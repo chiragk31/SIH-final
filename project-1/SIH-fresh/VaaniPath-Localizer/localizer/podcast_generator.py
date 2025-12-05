@@ -1,6 +1,8 @@
-import os
-# Trigger reload
+import logging
 import json
+import base64
+import os
+import shutil
 import random
 import asyncio
 from pathlib import Path
@@ -9,11 +11,10 @@ import httpx
 from pydub import AudioSegment
 from elevenlabs.client import ElevenLabs
 import groq
+import static_ffmpeg
+static_ffmpeg.add_paths()
 
-# Set ffmpeg path for pydub (Windows default installation path)
-AudioSegment.converter = r"C:\ffmpeg\bin\ffmpeg.exe"
-AudioSegment.ffprobe = r"C:\ffmpeg\bin\ffprobe.exe"
-
+# Removed hardcoded ffmpeg paths allow static_ffmpeg or system path to work
 # Constants
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "sk_4aedf5b40a578f6d98e20586d6636d83495580123206dcaf")
@@ -81,7 +82,7 @@ class PodcastGenerator:
         2. No "Host 1" or "Host 2" labels in text, just the dialogue.
         3. Make it engaging and easy to understand.
         4. Length: 4-6 exchanges.
-        5. Return ONLY valid JSON array format: [{{ "speaker": "Alex", "text": "..." }}, {{ "speaker": "Jordan", "text": "..." }}]
+        5. Return ONLY valid JSON object with a "dialogue" key containing the array: {{ "dialogue": [{{ "speaker": "Alex", "text": "..." }}, {{ "speaker": "Jordan", "text": "..." }}] }}
         
         TEXT:
         {text[:4000]}
@@ -106,15 +107,28 @@ class PodcastGenerator:
             elif "```" in content:
                 content = content.split("```")[1].split("```")[0]
                 
+            print(f"📊 Groq Response Content: {content[:200]}...") # Debug log
             script = json.loads(content)
-            # Ensure it's a list
-            if isinstance(script, dict) and "dialogue" in script:
-                return script["dialogue"]
-            elif isinstance(script, list):
+            
+            # Normalize to list
+            if isinstance(script, dict):
+                # Look for common keys
+                if "dialogue" in script:
+                    return script["dialogue"]
+                elif "script" in script:
+                    return script["script"]
+                elif "conversation" in script:
+                    return script["conversation"]
+                # If just random keys, maybe values are the list?
+                for key, value in script.items():
+                    if isinstance(value, list):
+                        return value
+            
+            if isinstance(script, list):
                 return script
-            else:
-                print("❌ Unexpected JSON format from Groq. Using Mock.")
-                return self._get_mock_script(language)
+                
+            print(f"❌ Unexpected JSON structure: {type(script)}. Using Mock.")
+            return self._get_mock_script(language)
                 
         except Exception as e:
             print(f"❌ Groq Error: {e}. Using Mock.")
