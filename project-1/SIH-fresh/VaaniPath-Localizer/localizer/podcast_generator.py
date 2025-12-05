@@ -1,4 +1,5 @@
 import os
+# Trigger reload
 import json
 import random
 import asyncio
@@ -6,34 +7,38 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import httpx
 from pydub import AudioSegment
+from elevenlabs.client import ElevenLabs
+import groq
 
 # Set ffmpeg path for pydub (Windows default installation path)
 AudioSegment.converter = r"C:\ffmpeg\bin\ffmpeg.exe"
 AudioSegment.ffprobe = r"C:\ffmpeg\bin\ffprobe.exe"
 
-# Optional Groq import
-try:
-    from groq import Groq
-    GROQ_AVAILABLE = True
-except ImportError:
-    GROQ_AVAILABLE = False
-    Groq = None
+# Constants
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "sk_4aedf5b40a578f6d98e20586d6636d83495580123206dcaf")
 
 class PodcastGenerator:
     def __init__(self, output_dir: str):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
-        # API Keys
-        self.groq_api_key = os.getenv("GROQ_API_KEY")
-        self.elevenlabs_api_key = os.getenv("ELEVENLABS_API_KEY")
-        
-        # Initialize Groq client if available and key exists
-        if GROQ_AVAILABLE and self.groq_api_key:
-            self.groq_client = Groq(api_key=self.groq_api_key)
-        else:
-            self.groq_client = None
-        
+        # Initialize Groq Client
+        self.groq_client = None
+        if GROQ_API_KEY:
+            try:
+                self.groq_client = groq.Groq(api_key=GROQ_API_KEY)
+            except Exception as e:
+                print(f"❌ Failed to initialize Groq: {e}")
+
+        # Initialize ElevenLabs Client
+        self.elevenlabs_client = None
+        if ELEVENLABS_API_KEY:
+            try:
+                self.elevenlabs_client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
+            except Exception as e:
+                print(f"❌ Failed to initialize ElevenLabs: {e}")
+
         # Voice Configuration
         self.voices = {
             "Alex": {
@@ -47,6 +52,20 @@ class PodcastGenerator:
                 "edge_voice": "en-US-JennyNeural"
             }
         }
+
+    def extract_text_from_pdf(self, pdf_path: str) -> str:
+        """Extracts text from a PDF file."""
+        import PyPDF2
+        text = ""
+        try:
+            with open(pdf_path, 'rb') as file:
+                reader = PyPDF2.PdfReader(file)
+                for page in reader.pages:
+                    text += page.extract_text() + "\n"
+            return text.strip()
+        except Exception as e:
+            print(f"❌ Failed to extract text from PDF: {e}")
+            return ""
 
     async def generate_script(self, text: str, language: str) -> List[Dict[str, str]]:
         """Generate a podcast script from text using Groq or Mock fallback."""
@@ -69,12 +88,13 @@ class PodcastGenerator:
         """
 
         try:
+            # Replaced deprecated llama3-8b-8192 with llama-3.3-70b-versatile
             chat_completion = self.groq_client.chat.completions.create(
                 messages=[
                     {"role": "system", "content": "You are a professional podcast script writer."},
                     {"role": "user", "content": prompt}
                 ],
-                model="llama3-8b-8192",
+                model="llama-3.3-70b-versatile", 
                 temperature=0.7,
                 response_format={"type": "json_object"}
             )
@@ -106,101 +126,95 @@ class PodcastGenerator:
              return [
                 {"speaker": "Alex", "text": "Namaste doston! Aaj hum ek bahut hi dilchasp topic par baat karne wale hain."},
                 {"speaker": "Jordan", "text": "Bilkul Alex! Yeh topic sach mein kaafi interesting hai aur hamare listeners ko zaroor pasand aayega."},
-                {"speaker": "Alex", "text": "Sahi kaha Jordan. To chaliye bina kisi deri ke shuru karte hain aur gehraai mein jaante hain."},
-                {"speaker": "Jordan", "text": "Haan, aur mujhe lagta hai ki iske practical applications bhi kaafi wide hain."},
-                {"speaker": "Alex", "text": "Exactly! To doston, dhyaan se suniye aur apne sawaal humein bhejna na bhoolein."}
+                {"speaker": "Alex", "text": "Sahi kaha tumne. Chaliye shuru karte hain aur dekhte hain isme kya khaas hai."},
+                {"speaker": "Jordan", "text": "Haan, mujhe yakeen hai ki yeh charcha bahut gyaanvardhak hogi."}
             ]
-        
-        return [
-            {"speaker": "Alex", "text": "Hey everyone! Welcome back to the show. Today we have a fascinating topic to discuss."},
-            {"speaker": "Jordan", "text": "That's right, Alex! I've been reading through this material and it's really mind-blowing."},
-            {"speaker": "Alex", "text": "I know, right? The way it breaks down complex concepts into simple ideas is just brilliant."},
-            {"speaker": "Jordan", "text": "Absolutely. And I think our listeners are going to find the practical applications really useful."},
-            {"speaker": "Alex", "text": "For sure. So let's dive right in and explore the key takeaways!"}
-        ]
+        else:
+            return [
+                {"speaker": "Alex", "text": "Hello everyone! Today we are going to discuss a very interesting topic."},
+                {"speaker": "Jordan", "text": "Absolutely Alex! This topic is really fascinating and I'm sure our listeners will love it."},
+                {"speaker": "Alex", "text": "You're right. Let's dive in and explore what makes it so special."},
+                {"speaker": "Jordan", "text": "Yes, I'm confident this discussion will be very enlightening."}
+            ]
 
-    async def _generate_audio_segment(self, text: str, speaker: str) -> str:
-        """Generate audio for a single segment using ElevenLabs or gTTS."""
-        voice_config = self.voices.get(speaker, self.voices["Alex"])
-        temp_file = self.output_dir / f"temp_{random.randint(1000, 9999)}.mp3"
+    async def generate_audio(self, script: List[Dict[str, str]]) -> str:
+        """Generate audio for the script using ElevenLabs with gTTS fallback."""
+        audio_segments = []
         
-        # 1. Try ElevenLabs
-        if self.elevenlabs_api_key:
-            try:
-                async with httpx.AsyncClient() as client:
-                    response = await client.post(
-                        f"https://api.elevenlabs.io/v1/text-to-speech/{voice_config['elevenlabs_id']}",
-                        headers={
-                            "xi-api-key": self.elevenlabs_api_key,
-                            "Content-Type": "application/json"
-                        },
-                        json={
-                            "text": text,
-                            "model_id": "eleven_multilingual_v2",
-                            "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}
-                        },
-                        timeout=30.0
-                    )
-                    if response.status_code == 200:
-                        with open(temp_file, "wb") as f:
-                            f.write(response.content)
-                        print(f"✅ Generated audio with ElevenLabs for {speaker}")
-                        return str(temp_file)
-                    else:
-                        print(f"⚠️ ElevenLabs Error ({response.status_code}): {response.text}")
-            except Exception as e:
-                print(f"⚠️ ElevenLabs Exception: {e}")
-
-        # 2. Fallback to gTTS (Google Text-to-Speech - simpler, no ffmpeg needed)
-        try:
-            from gtts import gTTS
-            # Use different speech rates for different speakers
-            slow = (speaker == "Jordan")  # Jordan speaks slightly slower
-            tts = gTTS(text=text, lang='en', slow=slow)
-            tts.save(str(temp_file))
-            print(f"✅ Generated audio with gTTS for {speaker}")
-            return str(temp_file)
-        except Exception as e:
-            print(f"❌ gTTS Error: {e}")
-            return None
-
-    async def create_podcast(self, text: str, language: str = "english") -> str:
-        """Main method to generate the full podcast."""
-        print(f"🎙️ Starting podcast generation for language: {language}")
-        
-        # 1. Generate Script
-        script = await self.generate_script(text, language)
-        print(f"📝 Generated script with {len(script)} exchanges")
-        
-        # 2. Generate Audio Segments
-        audio_files = []
         for i, line in enumerate(script):
-            print(f"🎤 Generating audio {i+1}/{len(script)}: {line['speaker']}")
-            audio_file = await self._generate_audio_segment(line["text"], line["speaker"])
-            if audio_file and os.path.exists(audio_file):
-                audio_files.append(audio_file)
-                print(f"✅ Audio file created: {audio_file}")
+            speaker = line["speaker"]
+            text = line["text"]
+            filename = f"segment_{i}_{speaker}.mp3"
+            filepath = self.output_dir / filename
+            
+            # Try ElevenLabs first
+            if self.elevenlabs_client:
+                try:
+                    voice_id = self.voices.get(speaker, {}).get("elevenlabs_id")
+                    if voice_id:
+                        # Updated code for ElevenLabs v1.0+ SDK
+                        audio = self.elevenlabs_client.text_to_speech.convert(
+                            text=text,
+                            voice_id=voice_id,
+                            model_id="eleven_multilingual_v2"
+                        )
+                        # Save audio
+                        with open(filepath, "wb") as f:
+                            for chunk in audio:
+                                f.write(chunk)
+                        audio_segments.append(filepath)
+                        continue
+                except Exception as e:
+                    print(f"⚠️ ElevenLabs failed for {speaker}: {e}. Falling back to gTTS.")
 
-        if not audio_files:
-            raise Exception("Failed to generate any audio segments")
-        
-        # 3. Simple solution: Just use the longest audio file for now
-        # TODO: Proper merging requires ffmpeg in PATH (restart terminal after installation)
-        print(f"📦 Using first audio segment (ffmpeg needed for full merge)")
-        
-        output_filename = f"podcast_{random.randint(10000, 99999)}.mp3"
-        output_path = self.output_dir / output_filename
-        
-        # Copy the first/longest file
-        import shutil
-        shutil.copy(audio_files[0], output_path)
-        
-        # Cleanup temp files
-        for f in audio_files:
+            # Fallback to gTTS
             try:
-                os.remove(f)
+                from gtts import gTTS
+                tts = gTTS(text=text, lang='en', tld='co.in') 
+                tts.save(str(filepath))
+                audio_segments.append(filepath)
+            except Exception as e:
+                print(f"❌ gTTS failed for {speaker}: {e}")
+
+        if not audio_segments:
+            raise Exception("Failed to generate any audio segments")
+
+        output_filename = f"podcast_final_{random.randint(1000, 9999)}.mp3"
+        output_path = self.output_dir / output_filename
+
+        # Try merging with Pydub (requires ffmpeg)
+        try:
+            combined = AudioSegment.empty()
+            silence = AudioSegment.silent(duration=500) 
+            for seg_path in audio_segments:
+                segment = AudioSegment.from_mp3(str(seg_path))
+                combined += segment + silence
+            combined.export(str(output_path), format="mp3")
+            print("✅ Audio merged using Pydub/FFmpeg")
+        except Exception as e:
+            print(f"⚠️ Pydub merge failed (likely ffmpeg missing): {e}")
+            print("🔄 Falling back to simple file concatenation")
+            # Fallback: Simple binary concatenation (works for many MP3 players)
+            with open(output_path, 'wb') as outfile:
+                for seg_path in audio_segments:
+                    with open(seg_path, 'rb') as infile:
+                        outfile.write(infile.read())
+        
+        # Cleanup segments
+        for seg_path in audio_segments:
+            try:
+                os.remove(seg_path)
             except:
                 pass
-        
-        print(f"✅ Podcast generated: {output_path}")
+                
         return str(output_path)
+
+    async def create_podcast(self, text: str, language: str) -> str:
+        """Orchestrate the podcast creation process."""
+        print(f"🎙️ Generating script for language: {language}...")
+        script = await self.generate_script(text, language)
+        
+        print(f"🔊 Synthesizing audio for {len(script)} dialogue lines...")
+        audio_path = await self.generate_audio(script)
+        
+        return audio_path

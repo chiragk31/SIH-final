@@ -229,6 +229,48 @@ def run_job(
         except Exception as e:
             logger.error(f"Cloudinary upload failed: {e}")
         
+        # 📝 Generate and Upload Subtitles (VTT) - Translated
+        vtt_path = os.path.join(base_out, "subtitles.vtt")
+        
+        # 🚀 Use smart splitting for better VTT display
+        from .utils import smart_split_text
+        translated_chunks = []
+        
+        for chunk in chunks_metadata:
+            chunk_start = chunk["start"]
+            chunk_end = chunk["end"]
+            chunk_duration = chunk_end - chunk_start
+            text = chunk.get("text_translated", "").strip()
+            
+            if not text:
+                continue
+                
+            # Use smart split with 40 chars limit (YouTube style)
+            real_sentences = smart_split_text(text, max_chars=40)
+            
+            total_len = sum(len(s) for s in real_sentences)
+            if total_len == 0:
+                continue
+                
+            current_time = chunk_start
+            for sent in real_sentences:
+                sent_duration = (len(sent) / total_len) * chunk_duration
+                translated_chunks.append({
+                    "start": current_time,
+                    "end": current_time + sent_duration,
+                    "text": sent
+                })
+                current_time += sent_duration
+
+        generate_vtt(translated_chunks, vtt_path)
+        subtitle_url = cloudinary_upload(
+            vtt_path,
+            job_id,
+            target,
+            content_type='subtitle'
+        )
+        logger.info(f"📝 Subtitle URL ({target}): {subtitle_url}")
+
         # Build manifest
         manifest = build_manifest(
             job_id=job_id,
@@ -242,6 +284,7 @@ def run_job(
             final_audio=final_audio,
             final_video=final_video,
             cloudinary_url=cloudinary_url,
+            subtitle_url=subtitle_url,  # 🚀 Store Subtitle URL
         )
         
         elapsed = time.time() - start_time
@@ -384,7 +427,40 @@ def run_job(
 
         # 📝 Generate and Upload Subtitles (VTT) - Translated
         vtt_path = os.path.join(base_out, "subtitles.vtt")
-        generate_vtt(results, vtt_path)
+        
+        # 🚀 Use smart splitting for better VTT display
+        from .utils import smart_split_text
+        translated_chunks = []
+        
+        for chunk in results:
+            chunk_start = chunk["start"]
+            chunk_end = chunk["end"]
+            chunk_duration = chunk_end - chunk_start
+            text = chunk.get("text_translated", "").strip()
+            
+            if not text:
+                continue
+                
+            # Use smart split with 40 chars limit (YouTube style)
+            real_sentences = smart_split_text(text, max_chars=40)
+            
+            total_len = sum(len(s) for s in real_sentences)
+            if total_len == 0:
+                continue
+                
+            current_time = chunk_start
+            for sent in real_sentences:
+                # Proportional duration
+                sent_duration = (len(sent) / total_len) * chunk_duration
+                
+                translated_chunks.append({
+                    "start": current_time,
+                    "end": current_time + sent_duration,
+                    "text": sent
+                })
+                current_time += sent_duration
+
+        generate_vtt(translated_chunks, vtt_path)
         subtitle_url = upload_video_to_cloudinary(
             file_path=vtt_path,
             video_id=job_id,

@@ -12,6 +12,7 @@ import { getMyEnrollments, Enrollment } from '@/services/enrollments';
 import { BookOpen, Play, Video, CheckCircle2, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 
 const MyCourses = () => {
     const { t } = useTranslation();
@@ -19,33 +20,20 @@ const MyCourses = () => {
     const { toast } = useToast();
     const { user } = useAuth();
 
-    const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const { data, isLoading } = useQuery({
+        queryKey: ['my-enrollments'],
+        queryFn: getMyEnrollments,
+        enabled: !!user,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+
+    const enrollments = data?.enrollments || [];
 
     useEffect(() => {
         if (!user) {
             navigate('/login');
-            return;
         }
-        loadEnrollments();
     }, [user, navigate]);
-
-    const loadEnrollments = async () => {
-        try {
-            setIsLoading(true);
-            const response = await getMyEnrollments();
-            setEnrollments(response.enrollments);
-        } catch (error) {
-            console.error('Failed to load enrollments:', error);
-            toast({
-                title: 'Error',
-                description: 'Failed to load your courses',
-                variant: 'destructive',
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     return (
         <div className="min-h-screen relative bg-background text-foreground transition-colors duration-300">

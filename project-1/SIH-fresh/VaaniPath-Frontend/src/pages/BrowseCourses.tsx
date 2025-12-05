@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 
 const BrowseCourses = () => {
     const { t } = useTranslation();
@@ -34,43 +35,43 @@ const BrowseCourses = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedSubject, setSelectedSubject] = useState<string>('all');
     const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
-    const [isLoading, setIsLoading] = useState(true);
+    // isLoading is now handled by useQuery
     const [enrollingId, setEnrollingId] = useState<string | null>(null);
 
+    const { data: coursesData, isLoading: isCoursesLoading } = useQuery({
+        queryKey: ['courses', searchQuery, selectedSubject, selectedLanguage],
+        queryFn: () => getAllCourses({
+            search: searchQuery || undefined,
+            domain: selectedSubject !== 'all' ? selectedSubject : undefined,
+            language: selectedLanguage !== 'all' ? selectedLanguage : undefined,
+        }),
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+
+    const { data: enrollmentsData } = useQuery({
+        queryKey: ['my-enrollments'],
+        queryFn: getMyEnrollments,
+        enabled: !!user, // Only fetch if user is logged in
+    });
+
     useEffect(() => {
-        loadCourses();
-    }, []);
-
-    const loadCourses = async () => {
-        try {
-            setIsLoading(true);
-            const response = await getAllCourses({
-                search: searchQuery || undefined,
-                domain: selectedSubject !== 'all' ? selectedSubject : undefined,
-                language: selectedLanguage !== 'all' ? selectedLanguage : undefined,
-            });
-            setCourses(response.courses);
-
-            // Check enrollment status efficiently
-            if (user) {
-                try {
-                    const enrollmentsRes = await getMyEnrollments();
-                    const enrolledIds = new Set(enrollmentsRes.enrollments.map(e => e.course_id));
-                    setEnrolledCourses(enrolledIds);
-                } catch (error) {
-                    console.error('Failed to load enrollments:', error);
-                }
-            }
-        } catch (error) {
-            console.error('Failed to load courses:', error);
-            toast({
-                title: 'Error',
-                description: 'Failed to load courses',
-                variant: 'destructive',
-            });
-        } finally {
-            setIsLoading(false);
+        if (coursesData) {
+            setCourses(coursesData.courses);
         }
+    }, [coursesData]);
+
+    useEffect(() => {
+        if (enrollmentsData) {
+            const enrolledIds = new Set(enrollmentsData.enrollments.map((e: any) => e.course_id));
+            setEnrolledCourses(enrolledIds);
+        }
+    }, [enrollmentsData]);
+
+    const isLoading = isCoursesLoading;
+
+    // Legacy loadCourses for manual refresh if needed (though React Query handles this)
+    const loadCourses = () => {
+        // queryClient.invalidateQueries({ queryKey: ['courses'] })
     };
 
     const handleEnroll = async (courseId: string, courseTitle: string) => {
