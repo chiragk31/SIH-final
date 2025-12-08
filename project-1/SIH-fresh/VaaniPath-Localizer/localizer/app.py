@@ -23,6 +23,8 @@ from .audio_sync import concatenate_and_stretch
 from pathlib import Path
 from .audio_utils import get_duration
 from .cloudinary_uploader import upload_video_to_cloudinary as cloudinary_upload
+from .vulgar_detection.detector import VulgarDetector
+from .vulgar_detection.beeper import overlay_beeps, silence_regions
 
 
 
@@ -50,6 +52,11 @@ def process_chunk(
         mode=mode,
     )
 
+    # 1.5) Vulgar Detection - Masking
+    detector = VulgarDetector()
+    # Mask source text with [BEEP] for tracking
+    text_original = detector.mask_text(text_original) 
+
     # 2) Glossary cleanup
     merged_glossary = merge_glossaries(DEFAULT_GLOSSARY, job_context.get("glossary", {}))
     text_clean = clean_transcript(text_original, merged_glossary)
@@ -69,7 +76,15 @@ def process_chunk(
     # 5) TTS + SRT
     audio_out = os.path.join(tts_dir, f"chunk_{chunk_meta['index']:04d}.mp3")
     srt_out = os.path.join(tts_dir, f"chunk_{chunk_meta['index']:04d}.srt")
-    tts_synthesize(text_adapted, target_lang, audio_out, gender=voice_gender)
+    
+    # 🚀 Returns path AND beep regions
+    _, beep_regions = tts_synthesize(text_adapted, target_lang, audio_out, gender=voice_gender)
+    
+    # Silence the "BEEP" voice in the raw audio
+    if beep_regions:
+        silence_regions(audio_out, audio_out, beep_regions)
+        logger.info(f"Chunk {chunk_meta['index']}: Silenced {len(beep_regions)} 'BEEP' regions in raw audio")
+        
     generate_srt(segments, srt_out)
 
     # Keep only raw TTS generation, remove time stretching
@@ -84,6 +99,7 @@ def process_chunk(
         "audio_path": final_audio_path,
         "srt_path": srt_out,
         "segments": segments,  # 🚀 Return segments for fine-grained VTT
+        "vulgar_regions": beep_regions # 🚀 Pass TTS-detected regions
     }
 
 # Gemini-preferred languages that should use single-pass processing
@@ -130,6 +146,10 @@ def process_full_video(
     )
     logger.info(f"Transcribed full audio: {len(text_original)} chars")
     
+    # Vulgar Detection - Masking
+    detector = VulgarDetector()
+    text_original = detector.mask_text(text_original)
+
     # Glossary cleanup
     merged_glossary = merge_glossaries(DEFAULT_GLOSSARY, job_context.get("glossary", {}))
     text_clean = clean_transcript(text_original, merged_glossary)
@@ -150,17 +170,35 @@ def process_full_video(
     # TTS + SRT for full content
     audio_out = os.path.join(tts_dir, "full_audio.mp3")
     srt_out = os.path.join(tts_dir, "full_audio.srt")
-    tts_synthesize(text_adapted, target, audio_out, gender=voice_gender)
+    
+    _, beep_regions = tts_synthesize(text_adapted, target, audio_out, gender=voice_gender)
+    
+    # Silence raw "BEEP" words
+    if beep_regions:
+        silence_regions(audio_out, audio_out, beep_regions)
+
     generate_srt(segments, srt_out)
     logger.info(f"Generated TTS: {audio_out}")
     
     # Time-stretch to match video duration
     video_duration = get_duration(input_path)
+    raw_duration = get_duration(audio_out)
     final_audio_path = os.path.join(base_out, "final_audio.wav")
     
     # Use time_stretch_audio from audio_utils
     from .audio_utils import time_stretch_audio
     time_stretch_audio(audio_out, video_duration, final_audio_path)
+    
+    # 🎵 Overlay Beeps on Final Audio (Single Pass - Semantic Strategy)
+    if beep_regions and raw_duration > 0:
+        stretch_ratio = video_duration / raw_duration
+        final_beep_regions = [(s * stretch_ratio, e * stretch_ratio) for s, e in beep_regions]
+        
+        logger.info(f"Overlaying {len(final_beep_regions)} beeps on final audio (Semantic Match Strategy)")
+        temp_beeped = final_audio_path.replace(".wav", "_beeped.wav")
+        overlay_beeps(final_audio_path, temp_beeped, final_beep_regions)
+        import shutil
+        shutil.move(temp_beeped, final_audio_path)
     
     # Merge with video (if input is video)
     final_video_path = os.path.join(base_out, "final_video.mp4")
@@ -353,6 +391,45 @@ def run_job(
         raise RuntimeError("Localization failed: No audio chunks were generated.")
         
     concatenate_and_stretch(audio_paths, video_duration, final_audio_path)
+
+    # 🎵 Overlay Beeps (Global for Chunked Mode - Semantic Strategy)
+    all_vulgar_regions = []
+    
+    for res in results:
+        # These are TTS-detected "BEEP" regions in RAW frame
+        raw_regions = res.get("vulgar_regions", [])
+        if not raw_regions:
+            continue
+            
+        chunk_start_global = res.get("start", 0.0)
+        chunk_end_global = res.get("end", 0.0)
+        target_duration = chunk_end_global - chunk_start_global
+        
+        # We need raw duration to calc stretch ratio. 
+        # res['audio_path'] points to the raw file (processed by silence_regions)
+        try:
+            raw_path = res["audio_path"]
+            raw_dur = get_duration(raw_path)
+            if raw_dur > 0:
+                ratio = target_duration / raw_dur
+                
+                # Align to global timeline
+                for s, e in raw_regions:
+                    # Scale to target duration
+                    s_scaled = s * ratio
+                    e_scaled = e * ratio
+                    # Shift to global start
+                    all_vulgar_regions.append((s_scaled + chunk_start_global, e_scaled + chunk_start_global))
+        except Exception as e:
+            logger.error(f"Failed to calc beep ratio for chunk {res.get('index')}: {e}")
+
+            
+    if all_vulgar_regions:
+        logger.info(f"Overlaying {len(all_vulgar_regions)} beeps on final sync audio (Semantic Match Strategy)")
+        temp_beeped = str(final_audio_path).replace(".wav", "_beeped.wav")
+        overlay_beeps(str(final_audio_path), temp_beeped, all_vulgar_regions)
+        import shutil
+        shutil.move(temp_beeped, str(final_audio_path))
 
     # 🎵 Detect if input is audio-only (no video stream)
     def has_video_stream(file_path: str) -> bool:

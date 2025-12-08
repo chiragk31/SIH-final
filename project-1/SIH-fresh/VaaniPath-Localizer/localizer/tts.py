@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import os
 import json
 import re
@@ -76,7 +76,7 @@ def apply_pronunciation_overrides(text: str, lang: str) -> str:
     return out
 
 
-async def _tts_edge_async(text: str, voice: str, output_path: str, rate: str | None = None, pitch: str | None = None) -> None:
+async def _tts_edge_async(text: str, voice: str, output_path: str, rate: str | None = None, pitch: str | None = None) -> List[Tuple[float, float]]:
     # Use edge-tts built-in prosody controls to avoid SSML tags being spoken.
     kwargs = {"text": text, "voice": voice}
     if rate is not None:
@@ -84,12 +84,26 @@ async def _tts_edge_async(text: str, voice: str, output_path: str, rate: str | N
     if pitch is not None:
         kwargs["pitch"] = pitch
     communicate = edge_tts.Communicate(**kwargs)
-    await communicate.save(output_path)
+    
+    beep_regions = []
+    
+    with open(output_path, "wb") as file:
+        async for chunk in communicate.stream():
+            if chunk["type"] == "audio":
+                file.write(chunk["data"])
+            elif chunk["type"] == "WordBoundary":
+                word = chunk.get("text", "").strip().upper()
+                if "BEEP" in word:
+                    # offset and duration are in 100ns units
+                    offset = chunk["offset"] / 10_000_000
+                    duration = chunk["duration"] / 10_000_000
+                    beep_regions.append((offset, offset + duration))
+                    
+    return beep_regions
 
 
-def _tts_edge(text: str, voice: str, output_path: str, rate: str | None = None, pitch: str | None = None) -> str:
-    asyncio.run(_tts_edge_async(text, voice, output_path, rate=rate, pitch=pitch))
-    return output_path
+def _tts_edge(text: str, voice: str, output_path: str, rate: str | None = None, pitch: str | None = None) -> List[Tuple[float, float]]:
+    return asyncio.run(_tts_edge_async(text, voice, output_path, rate=rate, pitch=pitch))
 
 
 def _select_edge_voice(lang: str) -> str | None:
@@ -128,7 +142,7 @@ def _select_edge_voice(lang: str) -> str | None:
         return None
 
 
-def tts_synthesize(text: str, lang: str, output_path: str, gender: str = 'male') -> str:
+def tts_synthesize(text: str, lang: str, output_path: str, gender: str = 'male') -> Tuple[str, List[Tuple[float, float]]]:
     """Synthesize text to speech with gender-specific voice"""
     text_for_tts = apply_pronunciation_overrides(text, lang)
     
@@ -140,7 +154,7 @@ def tts_synthesize(text: str, lang: str, output_path: str, gender: str = 'male')
         success = tts_google(text_for_tts, lang, output_path, gender=gender)
         if success:
             logger.info(f"✅ Saved TTS (Google Cloud {gender}) to {output_path}")
-            return output_path
+            return output_path, []
         else:
             logger.warning("⚠️ Google Cloud TTS failed, falling back to edge-tts")
     except Exception as e:
@@ -154,7 +168,7 @@ def tts_synthesize(text: str, lang: str, output_path: str, gender: str = 'male')
             success = tts_elevenlabs(text_for_tts, lang, output_path, gender=gender)
             if success:
                 logger.info(f"✅ Saved TTS (ElevenLabs {gender}) to {output_path}")
-                return output_path
+                return output_path, []
     except Exception:
         pass # Silently fail over
     
@@ -175,11 +189,11 @@ def tts_synthesize(text: str, lang: str, output_path: str, gender: str = 'male')
         try:
             base_lang = (lang or "").split("-")[0]
             if base_lang == "bho":
-                 _tts_edge(text_for_tts, voice, output_path, rate="-10%", pitch="-4%")
+                 regions = _tts_edge(text_for_tts, voice, output_path, rate="-10%", pitch="-4%")
             else:
-                _tts_edge(text_for_tts, voice, output_path)
-            logger.info(f"Saved TTS (edge-tts {voice}) to {output_path}")
-            return output_path
+                regions = _tts_edge(text_for_tts, voice, output_path)
+            logger.info(f"Saved TTS (edge-tts {voice}) to {output_path}. Captured {len(regions)} beep regions.")
+            return output_path, regions
         except Exception as e:
             logger.error(f"edge-tts synthesis failed: {e}; falling back to pyttsx3")
 
@@ -210,7 +224,7 @@ def tts_synthesize(text: str, lang: str, output_path: str, gender: str = 'male')
             engine.save_to_file(text_for_tts, output_path)
             engine.runAndWait()
             logger.info(f"Saved TTS (pyttsx3 {gender}) to {output_path}")
-            return output_path
+            return output_path, []
     except Exception as e:
         logger.error(f"pyttsx3 failed: {e}; falling back to gTTS")
 
@@ -237,7 +251,7 @@ def tts_synthesize(text: str, lang: str, output_path: str, gender: str = 'male')
         tts = gTTS(text=text_for_tts, lang=base_lang)
         tts.save(output_path)
     
-    return output_path
+    return output_path, []
 
 
 def _format_ts(seconds: float) -> str:

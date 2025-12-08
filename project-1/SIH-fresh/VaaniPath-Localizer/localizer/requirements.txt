@@ -12,3 +12,4 @@ pydub
 groq
 elevenlabs>=0.25.1
 PyPDF2
+better-profanity
