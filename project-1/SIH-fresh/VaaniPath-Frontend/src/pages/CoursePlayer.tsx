@@ -315,7 +315,21 @@ const CoursePlayer = () => {
 
     const completedCount = Object.values(progress).filter((p: any) => p.completed).length;
     const totalVideos = course.videos.length;
-    const overallProgress = totalVideos > 0 ? (completedCount / totalVideos) * 100 : 0;
+
+    // Calculate real-time overall progress
+    let overallProgress = 0;
+    if (totalVideos > 0) {
+        // Start with completed videos count
+        let totalProgress = completedCount;
+
+        // Add current video's partial progress (if not completed)
+        if (currentVideo && !progress[currentVideo.id]?.completed) {
+            // Use watchedPercentage state which updates on every timeupdate
+            totalProgress += (watchedPercentage / 100);
+        }
+
+        overallProgress = (totalProgress / totalVideos) * 100;
+    }
 
     return (
         <div className="min-h-screen relative bg-background text-foreground transition-colors duration-300">

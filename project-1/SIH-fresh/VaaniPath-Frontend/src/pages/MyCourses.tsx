@@ -22,7 +22,7 @@ const MyCourses = () => {
 
     const { data, isLoading } = useQuery({
         queryKey: ['my-enrollments'],
-        queryFn: getMyEnrollments,
+        queryFn: () => getMyEnrollments(),
         enabled: !!user,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });

@@ -16,9 +16,9 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { getAllCourses, Course } from '@/services/courses';
-import { enrollInCourse, isEnrolledInCourse, getMyEnrollments } from '@/services/enrollments';
+import { enrollInCourse, isEnrolledInCourse, getMyEnrollments, Enrollment } from '@/services/enrollments';
 import {
-    BookOpen, Search, Filter, X, Video, Clock, Languages, Users, Check
+    BookOpen, Search, Filter, X, Video, Clock, Languages, Users, Check, ChevronsLeft, ChevronsRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -38,6 +38,10 @@ const BrowseCourses = () => {
     // isLoading is now handled by useQuery
     const [enrollingId, setEnrollingId] = useState<string | null>(null);
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
+
     const { data: coursesData, isLoading: isCoursesLoading } = useQuery({
         queryKey: ['courses', searchQuery, selectedSubject, selectedLanguage],
         queryFn: () => getAllCourses({
@@ -50,7 +54,7 @@ const BrowseCourses = () => {
 
     const { data: enrollmentsData } = useQuery({
         queryKey: ['my-enrollments'],
-        queryFn: getMyEnrollments,
+        queryFn: () => getMyEnrollments(),
         enabled: !!user, // Only fetch if user is logged in
     });
 
@@ -62,12 +66,50 @@ const BrowseCourses = () => {
 
     useEffect(() => {
         if (enrollmentsData) {
-            const enrolledIds = new Set(enrollmentsData.enrollments.map((e: any) => e.course_id));
+            const enrolledIds = new Set<string>(enrollmentsData.enrollments.map((e: Enrollment) => e.course_id));
             setEnrolledCourses(enrolledIds);
         }
     }, [enrollmentsData]);
 
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, selectedSubject, selectedLanguage]);
+
     const isLoading = isCoursesLoading;
+
+    // Pagination calculations
+    const totalCourses = courses.length;
+    const totalPages = Math.ceil(totalCourses / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const paginatedCourses = courses.slice(startIndex, endIndex);
+    const displayStart = totalCourses > 0 ? startIndex + 1 : 0;
+    const displayEnd = Math.min(endIndex, totalCourses);
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     // Legacy loadCourses for manual refresh if needed (though React Query handles this)
     const loadCourses = () => {
@@ -213,6 +255,63 @@ const BrowseCourses = () => {
                     </div>
                 </motion.div>
 
+                {/* Pagination Controls - Top (Only show if more than 10 courses) */}
+                {totalCourses > ITEMS_PER_PAGE && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="flex items-center justify-between glass-card border-white/20 dark:border-white/10 p-4 rounded-xl shadow-lg mb-6"
+                    >
+                        <div className="text-sm text-muted-foreground">
+                            Showing <span className="font-semibold text-foreground">{displayStart}-{displayEnd}</span> of <span className="font-semibold text-foreground">{totalCourses}</span> courses
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleFirstPage}
+                                disabled={currentPage === 1}
+                                className="h-9"
+                                title="First Page"
+                            >
+                                <ChevronsLeft className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handlePreviousPage}
+                                disabled={currentPage === 1}
+                                className="h-9"
+                            >
+                                ← Previous
+                            </Button>
+                            <span className="text-sm text-muted-foreground px-3">
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleNextPage}
+                                disabled={currentPage === totalPages}
+                                className="h-9"
+                            >
+                                Next →
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleLastPage}
+                                disabled={currentPage === totalPages}
+                                className="h-9"
+                                title="Last Page"
+                            >
+                                <ChevronsRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </motion.div>
+                )}
+
                 {/* Course Grid */}
                 {isLoading ? (
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -239,121 +338,177 @@ const BrowseCourses = () => {
                         ))}
                     </div>
                 ) : courses.length > 0 ? (
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {courses.map((course, index) => {
-                            const isEnrolled = enrolledCourses.has(course.id);
+                    <>
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {paginatedCourses.map((course, index) => {
+                                const isEnrolled = enrolledCourses.has(course.id);
 
-                            return (
-                                <motion.div
-                                    key={course.id}
-                                    initial={{ opacity: 0, y: 30 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    whileHover={{ y: -8 }}
-                                    className="h-full"
-                                >
-                                    <Card className="h-full flex flex-col glass-card border-white/20 dark:border-white/10 shadow-xl hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 overflow-hidden">
-                                        {/* Thumbnail */}
-                                        <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
-                                            {course.thumbnail_url ? (
-                                                <img
-                                                    src={course.thumbnail_url}
-                                                    alt={course.title}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <BookOpen className="h-16 w-16 text-primary/30" />
-                                                </div>
-                                            )}
+                                return (
+                                    <motion.div
+                                        key={course.id}
+                                        initial={{ opacity: 0, y: 30 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                                        whileHover={{ y: -8 }}
+                                        className="h-full"
+                                    >
+                                        <Card className="h-full flex flex-col glass-card border-white/20 dark:border-white/10 shadow-xl hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 overflow-hidden">
+                                            {/* Thumbnail */}
+                                            <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
+                                                {course.thumbnail_url ? (
+                                                    <img
+                                                        src={course.thumbnail_url}
+                                                        alt={course.title}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <BookOpen className="h-16 w-16 text-primary/30" />
+                                                    </div>
+                                                )}
 
-                                            {isEnrolled && (
-                                                <div className="absolute top-3 right-3">
-                                                    <Badge className="bg-green-500 hover:bg-green-600">
-                                                        <Check className="h-3 w-3 mr-1" />
-                                                        {t('browseCourses.enrolled')}
-                                                    </Badge>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <CardHeader className="flex-grow">
-                                            {/* Subject & Teacher */}
-                                            <div className="flex items-center justify-between mb-3">
-                                                <Badge variant="secondary" className="bg-secondary/20 border-secondary/30">
-                                                    {course.domain}
-                                                </Badge>
-                                                {course.teacher_name && (
-                                                    <span className="text-xs text-muted-foreground">
-                                                        {t('browseCourses.by')} {course.teacher_name}
-                                                    </span>
+                                                {isEnrolled && (
+                                                    <div className="absolute top-3 right-3">
+                                                        <Badge className="bg-green-500 hover:bg-green-600">
+                                                            <Check className="h-3 w-3 mr-1" />
+                                                            {t('browseCourses.enrolled')}
+                                                        </Badge>
+                                                    </div>
                                                 )}
                                             </div>
 
-                                            <CardTitle className="line-clamp-2 text-lg">
-                                                {course.title}
-                                            </CardTitle>
-                                            <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
-                                                {course.description || t('browseCourses.noDescription')}
-                                            </p>
-                                        </CardHeader>
-
-                                        {/* Stats */}
-                                        <CardContent className="pt-0">
-                                            <div className="grid grid-cols-2 gap-3 mb-4 p-3 bg-muted/30 rounded-lg text-sm">
-                                                <div className="flex items-center gap-2">
-                                                    <Video className="h-4 w-4 text-muted-foreground" />
-                                                    <span>{course.total_videos || 0} videos</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="h-4 w-4 text-muted-foreground" />
-                                                    <span>{formatDuration(course.total_duration)}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Languages */}
-                                            <div className="flex flex-wrap gap-1 mb-4">
-                                                <Badge variant="outline" className="text-xs">
-                                                    {course.source_language.toUpperCase()}
-                                                </Badge>
-                                                {course.target_languages.slice(0, 2).map((lang) => (
-                                                    <Badge
-                                                        key={lang}
-                                                        variant="outline"
-                                                        className="text-xs border-primary/30 text-primary bg-primary/5"
-                                                    >
-                                                        {lang.toUpperCase()}
+                                            <CardHeader className="flex-grow">
+                                                {/* Subject & Teacher */}
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <Badge variant="secondary" className="bg-secondary/20 border-secondary/30">
+                                                        {course.domain}
                                                     </Badge>
-                                                ))}
-                                                {course.target_languages.length > 2 && (
+                                                    {course.teacher_name && (
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {t('browseCourses.by')} {course.teacher_name}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <CardTitle className="line-clamp-2 text-lg">
+                                                    {course.title}
+                                                </CardTitle>
+                                                <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
+                                                    {course.description || t('browseCourses.noDescription')}
+                                                </p>
+                                            </CardHeader>
+
+                                            {/* Stats */}
+                                            <CardContent className="pt-0">
+                                                <div className="grid grid-cols-2 gap-3 mb-4 p-3 bg-muted/30 rounded-lg text-sm">
+                                                    <div className="flex items-center gap-2">
+                                                        <Video className="h-4 w-4 text-muted-foreground" />
+                                                        <span>{course.total_videos || 0} videos</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="h-4 w-4 text-muted-foreground" />
+                                                        <span>{formatDuration(course.total_duration)}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Languages */}
+                                                <div className="flex flex-wrap gap-1 mb-4">
                                                     <Badge variant="outline" className="text-xs">
-                                                        +{course.target_languages.length - 2}
+                                                        {course.source_language.toUpperCase()}
                                                     </Badge>
-                                                )}
-                                            </div>
+                                                    {course.target_languages.slice(0, 2).map((lang) => (
+                                                        <Badge
+                                                            key={lang}
+                                                            variant="outline"
+                                                            className="text-xs border-primary/30 text-primary bg-primary/5"
+                                                        >
+                                                            {lang.toUpperCase()}
+                                                        </Badge>
+                                                    ))}
+                                                    {course.target_languages.length > 2 && (
+                                                        <Badge variant="outline" className="text-xs">
+                                                            +{course.target_languages.length - 2}
+                                                        </Badge>
+                                                    )}
+                                                </div>
 
-                                            {/* Action Button */}
-                                            {isEnrolled ? (
-                                                <Button
-                                                    className="w-full"
-                                                    onClick={() => navigate('/my-courses')}
-                                                >
-                                                    {t('myCourses.continue')}
-                                                </Button>
-                                            ) : (
-                                                <Button
-                                                    className="w-full"
-                                                    onClick={() => navigate(`/course/${course.id}`)}
-                                                >
-                                                    {t('common.viewCourse')}
-                                                </Button>
-                                            )}
-                                        </CardContent>
-                                    </Card>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
+                                                {/* Action Button */}
+                                                {isEnrolled ? (
+                                                    <Button
+                                                        className="w-full"
+                                                        onClick={() => navigate('/my-courses')}
+                                                    >
+                                                        {t('myCourses.continue')}
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        className="w-full"
+                                                        onClick={() => navigate(`/course/${course.id}`)}
+                                                    >
+                                                        {t('common.viewCourse')}
+                                                    </Button>
+                                                )}
+                                            </CardContent>
+                                        </Card>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Pagination Controls - Bottom (Only show if more than 10 courses) */}
+                        {totalCourses > ITEMS_PER_PAGE && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, delay: 0.2 }}
+                                className="flex items-center justify-center glass-card border-white/20 dark:border-white/10 p-4 rounded-xl shadow-lg mt-8"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleFirstPage}
+                                        disabled={currentPage === 1}
+                                        className="h-9"
+                                        title="First Page"
+                                    >
+                                        <ChevronsLeft className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handlePreviousPage}
+                                        disabled={currentPage === 1}
+                                        className="h-9"
+                                    >
+                                        ← Previous
+                                    </Button>
+                                    <span className="text-sm text-muted-foreground px-2">
+                                        {displayStart}-{displayEnd} of {totalCourses}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleNextPage}
+                                        disabled={currentPage === totalPages}
+                                        className="h-9"
+                                    >
+                                        Next →
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleLastPage}
+                                        disabled={currentPage === totalPages}
+                                        className="h-9"
+                                        title="Last Page"
+                                    >
+                                        <ChevronsRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </>
                 ) : (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
