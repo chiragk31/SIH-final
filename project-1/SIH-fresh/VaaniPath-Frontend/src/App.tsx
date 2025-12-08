@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageSync } from "@/components/LanguageSync"; // Added import
 import { AnimatePresence } from "framer-motion";
 import { WelcomeIntro } from "@/components/WelcomeIntro";
 
@@ -120,6 +121,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <AuthProvider>
+        <LanguageSync />
         <TooltipProvider>
           <Toaster />
           <Sonner />

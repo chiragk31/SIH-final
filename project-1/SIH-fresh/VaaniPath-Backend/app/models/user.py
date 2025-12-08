@@ -8,6 +8,7 @@ class UserCreate(BaseModel):
     password: str
     full_name: str
     is_admin: bool = False
+    preferred_language: str = "en"
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -21,6 +22,7 @@ class UserResponse(BaseModel):
     is_teacher: bool = False
     is_admin: bool = False
     avatar_url: Optional[str] = None
+    preferred_language: str = "en"  # User's preferred UI language
     created_at: datetime
 
 class Token(BaseModel):

@@ -67,6 +67,7 @@ async def get_current_user(
             "is_teacher": user_data.get("is_teacher", False),
             "profile_picture_url": user_data.get("profile_picture_url"),
             "bio": user_data.get("bio"),
+            "preferred_language": user_data.get("preferred_language", "en"),
             "created_at": str(user_data.get("created_at")) if user_data.get("created_at") else None
         }
     

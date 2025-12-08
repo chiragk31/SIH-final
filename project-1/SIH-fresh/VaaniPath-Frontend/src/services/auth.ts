@@ -10,6 +10,7 @@ export interface SignupData {
     password: string;
     full_name: string;
     is_admin?: boolean;
+    preferred_language?: string;
 }
 
 export interface User {
@@ -18,12 +19,14 @@ export interface User {
     full_name: string;
     is_admin: boolean;
     is_teacher: boolean;
+    preferred_language: string;  // User's preferred UI language
     created_at: string;
 }
 
 export interface TokenResponse {
     access_token: string;
     token_type: string;
+    user: User;  // User object returned from login
 }
 
 // Login
