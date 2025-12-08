@@ -374,8 +374,10 @@ async def upload_and_localize(
     job_id: Optional[str] = Form(None),
     mode: str = Form("fast"),
     voice: Optional[str] = Form(None),
+    voice_gender: str = Form("male"),
 ) -> Dict[str, Any]:
     # Apply voice preference if provided
+    voice_param = voice if voice else voice_gender
     await _apply_voice_param(target, voice)
 
     uploads_dir = os.path.join(os.path.dirname(__file__), "uploads")
@@ -398,6 +400,7 @@ async def upload_and_localize(
         job_id=job,
         course_id=course_id,
         mode=mode,
+        voice_gender=voice_param,
     )
     
     # Reload manifest to get cloudinary URL
@@ -445,21 +448,12 @@ async def upload_alias(
     job_id: Optional[str] = Form(None),
     mode: str = Form("fast"),
     voice: Optional[str] = Form(None),
+    voice_gender: str = Form("male"),
 ) -> Dict[str, Any]:
-    return await upload_and_localize(file, source, target, course_id, job_id, mode, voice)
+    return await upload_and_localize(file, source, target, course_id, job_id, mode, voice, voice_gender)
 
 
-# -----------------
-# Podcast Generator Endpoint
-# -----------------
-    m = get_manifest(os.path.basename(os.path.dirname(manifest_path)))
-    final_out = finalize_resynthesis(manifest_path, m)
-    
-    try:
-        cleanup_job_artifacts(manifest_path)
-    except Exception:
-        pass
-    return FileResponse(final_out, media_type="video/mp4", filename=os.path.basename(final_out))
+
 
 
 # Feedback capture (MVP)
@@ -530,118 +524,7 @@ async def export_captions(job_id: str, format: str = "srt") -> FileResponse:
     return FileResponse(tmp_zip, media_type="application/zip", filename=os.path.basename(tmp_zip))
 
 
-# Seed Indian language voices via dynamic discovery
-@app.post("/voice/seed/india")
-async def seed_indian_voices(gender: str = "male") -> Dict[str, Any]:
-    langs = [
-        "hi-IN",
-        "bn-IN",
-        "ta-IN",
-        "te-IN",
-        "mr-IN",
-        "gu-IN",
-        "pa-IN",
-        "kn-IN",
-        "ml-IN",
-        "or-IN",
-    ]
-    vm = _load_voice_map()
-    applied = []
-    for lang in langs:
-        try:
-            chosen = await _resolve_gender_voice(lang, gender)
-            if chosen:
-                vm[lang] = chosen
-                vm.setdefault(lang.split("-")[0], chosen)
-                applied.append({"lang": lang, "voice": chosen})
-        except Exception:
-            continue
-    _save_voice_map(vm)
-    return {"ok": True, "applied": applied}
 
-
-@app.post("/jobs/upload")
-async def upload_and_localize(
-    file: UploadFile = File(...),
-    source: str = Form("en"),
-    target: str = Form("hi"),
-    course_id: str = Form("general"),
-    job_id: Optional[str] = Form(None),
-    mode: str = Form("fast"),
-    voice: Optional[str] = Form(None),
-) -> Dict[str, Any]:
-    # Apply voice preference if provided
-    await _apply_voice_param(target, voice)
-
-    uploads_dir = os.path.join(os.path.dirname(__file__), "uploads")
-    os.makedirs(uploads_dir, exist_ok=True)
-    filename = file.filename or "upload.mp4"
-    input_path = os.path.join(uploads_dir, filename)
-    with open(input_path, "wb") as f:
-        f.write(await file.read())
-
-    job = job_id or os.path.splitext(filename)[0]
-    
-    # Run blocking job in threadpool to avoid blocking event loop
-    # This also allows asyncio.run() in tts.py to work correctly (since it runs in a separate thread)
-    from fastapi.concurrency import run_in_threadpool
-    manifest_path = await run_in_threadpool(
-        run_job,
-        input_path=input_path,
-        source=source,
-        target=target,
-        job_id=job,
-        course_id=course_id,
-        mode=mode,
-    )
-    
-    # Reload manifest to get cloudinary URL
-    with open(manifest_path, "r", encoding="utf-8") as f:
-        m = json.load(f)
-    
-    cloudinary_url = m.get("cloudinary_url")
-    if not cloudinary_url:
-        raise HTTPException(status_code=500, detail="Cloudinary URL not found in manifest")
-
-    # Extract Transcripts
-    full_text_original = ""
-    full_text_translated = ""
-    for chunk in m.get("chunks", []):
-        full_text_original += chunk.get("text_original", "") + " "
-        full_text_translated += chunk.get("text_translated", "") + " "
-
-    # Cleanup Local Files
-    try:
-        import shutil
-        job_dir = os.path.dirname(manifest_path)
-        shutil.rmtree(job_dir)
-    except Exception as e:
-        print(f"Cleanup failed for {job}: {e}")
-    
-    return {
-        "cloudinary_url": cloudinary_url,
-        "job_id": job,
-        "manifest_path": manifest_path,
-        "status": "success",
-        "transcript_original": full_text_original.strip(),
-        "transcript_translated": full_text_translated.strip(),
-        "subtitle_url": m.get("subtitle_url"),  # 🚀 NEW: Return subtitle URL
-        "english_subtitle_url": m.get("english_subtitle_url")  # 🚀 NEW: Return English subtitle URL
-    }
-
-
-# Alias endpoint for convenience
-@app.post("/upload")
-async def upload_alias(
-    file: UploadFile = File(...),
-    source: str = Form("en"),
-    target: str = Form("hi"),
-    course_id: str = Form("general"),
-    job_id: Optional[str] = Form(None),
-    mode: str = Form("fast"),
-    voice: Optional[str] = Form(None),
-) -> Dict[str, Any]:
-    return await upload_and_localize(file, source, target, course_id, job_id, mode, voice)
 
 
 # -----------------

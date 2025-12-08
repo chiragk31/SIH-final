@@ -155,7 +155,8 @@ async def trigger_localization(
     video_id: str,
     target_lang: str,
     source_lang: str = 'en',
-    course_id: str = 'general'
+    course_id: str = 'general',
+    voice_gender: str = 'male'
 ) -> Dict[str, Any]:
     """
     Trigger full localization: Download video -> Upload to ML -> Transcribe -> Translate
@@ -178,7 +179,8 @@ async def trigger_localization(
             'target': target_lang,
             'course_id': course_id,
             'job_id': video_id,
-            'mode': 'fast'
+            'mode': 'fast',
+            'voice_gender': voice_gender
         }
         
         logger.info(f"Uploading to ML service...")

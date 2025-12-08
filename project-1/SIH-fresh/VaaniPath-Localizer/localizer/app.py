@@ -38,6 +38,7 @@ def process_chunk(
     job_context: Dict[str, Any],
     tts_dir: str,
     translation_model: str,
+    voice_gender: str = 'male',
 ) -> Dict[str, Any]:
     audio_path = chunk_meta["audio_path"]
 
@@ -68,7 +69,7 @@ def process_chunk(
     # 5) TTS + SRT
     audio_out = os.path.join(tts_dir, f"chunk_{chunk_meta['index']:04d}.mp3")
     srt_out = os.path.join(tts_dir, f"chunk_{chunk_meta['index']:04d}.srt")
-    tts_synthesize(text_adapted, target_lang, audio_out)
+    tts_synthesize(text_adapted, target_lang, audio_out, gender=voice_gender)
     generate_srt(segments, srt_out)
 
     # Keep only raw TTS generation, remove time stretching
@@ -98,6 +99,7 @@ def process_full_video(
     mode: str,
     translation_model: str,
     base_out: str,
+    voice_gender: str = 'male',
 ) -> tuple[str, str, List[Dict[str, Any]]]:
     """Process entire video without chunking (for Gemini languages).
     
@@ -148,7 +150,7 @@ def process_full_video(
     # TTS + SRT for full content
     audio_out = os.path.join(tts_dir, "full_audio.mp3")
     srt_out = os.path.join(tts_dir, "full_audio.srt")
-    tts_synthesize(text_adapted, target, audio_out)
+    tts_synthesize(text_adapted, target, audio_out, gender=voice_gender)
     generate_srt(segments, srt_out)
     logger.info(f"Generated TTS: {audio_out}")
     
@@ -186,6 +188,7 @@ def run_job(
     course_id: str,
     mode: str = "fast",
     translation_model: str = TRANSLATION_DEFAULT_MODEL,
+    voice_gender: str = 'male',
 ) -> str:
     start_time = time.time()
     base_out = os.path.join(os.path.dirname(__file__), "output", job_id)
@@ -196,7 +199,8 @@ def run_job(
     if base_target in GEMINI_PREFERRED_LANGS:
         logger.info(f"Language {target} requires Gemini - using single-pass processing")
         final_audio, final_video, chunks_metadata = process_full_video(
-            input_path, source, target, job_id, course_id, mode, translation_model, base_out
+            input_path, source, target, job_id, course_id, mode, translation_model, base_out,
+            voice_gender=voice_gender
         )
         
         # Upload to Cloudinary
@@ -323,6 +327,7 @@ def run_job(
                 job_context,
                 tts_dir,
                 translation_model,
+                voice_gender  # Pass gender
             ): meta["index"]
             for meta in chunk_meta_list
         }
@@ -544,7 +549,7 @@ def get_chunk_detail(job_id: str, chunk_index: int) -> Dict[str, Any]:
     raise ValueError(f"Chunk {chunk_index} not found in job {job_id}")
 
 
-def reprocess_chunk(job_id: str, chunk_index: int, target_lang: str, mode: str = "fast") -> Dict[str, Any]:
+def reprocess_chunk(job_id: str, chunk_index: int, target_lang: str, mode: str = "fast", voice_gender: str = 'male') -> Dict[str, Any]:
     m = get_manifest(job_id)
     source = m.get("source_lang", "en")
     course_id = m.get("course_id", "")
@@ -574,6 +579,7 @@ def reprocess_chunk(job_id: str, chunk_index: int, target_lang: str, mode: str =
         job_context=job_context,
         tts_dir=tts_dir,
         translation_model=TRANSLATION_DEFAULT_MODEL,
+        voice_gender=voice_gender,
     )
 
     # Update manifest in place

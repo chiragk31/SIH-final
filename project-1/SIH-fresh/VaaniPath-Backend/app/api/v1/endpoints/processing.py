@@ -44,14 +44,15 @@ async def process_dubbing_task(video_id: str, language: str, content_type: str =
             api_secret=settings.CLOUDINARY_API_SECRET
         )
         
-        # Get video URL from DB
-        video_response = supabase.table("videos").select("file_url, source_language").eq("id", video_id).execute()
+        # Get video URL, source_language, and tutor_gender from DB
+        video_response = supabase.table("videos").select("file_url, source_language, tutor_gender").eq("id", video_id).execute()
         if not video_response.data:
             raise ValueError(f"Video {video_id} not found")
             
         video_data = video_response.data[0]
         video_url = video_data.get("file_url")
         source_lang = video_data.get("source_language", "en")
+        tutor_gender = video_data.get("tutor_gender", "male")  # Default to male if not specified
         
         if not video_url:
             raise ValueError("Video URL not found")
@@ -64,7 +65,8 @@ async def process_dubbing_task(video_id: str, language: str, content_type: str =
                 video_url=video_url,
                 video_id=video_id,
                 target_lang=language,
-                source_lang=source_lang
+                source_lang=source_lang,
+                voice_gender=tutor_gender  # Pass tutor's selected gender
             )
         elif content_type == "audio":
             # TODO: Implement audio dubbing client
@@ -72,7 +74,8 @@ async def process_dubbing_task(video_id: str, language: str, content_type: str =
                 video_url=video_url,
                 video_id=video_id,
                 target_lang=language,
-                source_lang=source_lang
+                source_lang=source_lang,
+                voice_gender=tutor_gender  # Pass tutor's selected gender
             )
         elif content_type == "document":
             # TODO: Implement document translation client
