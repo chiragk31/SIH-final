@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { MessageCircle, ThumbsUp, MessageSquare, Languages } from 'lucide-react';
+import { MessageCircle, ThumbsUp, MessageSquare, Languages, Volume2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Post {
@@ -30,6 +30,7 @@ const ChatCommunity = () => {
   const [showNewPost, setShowNewPost] = useState(false);
   const [postTitle, setPostTitle] = useState('');
   const [postContent, setPostContent] = useState('');
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
   // TODO: Fetch posts from backend
   // GET /api/community/posts?language=:language
@@ -91,6 +92,52 @@ const ChatCommunity = () => {
     setShowNewPost(false);
     setPostTitle('');
     setPostContent('');
+  };
+
+  const playAudio = async (text: string, postId: string, lang: string) => {
+    try {
+      if (playingAudio === postId) {
+        // Stop logic if needed, but for now just prevent re-trigger
+        return;
+      }
+      setPlayingAudio(postId);
+
+      const response = await fetch('http://localhost:8001/dub', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: text,
+          target_lang: lang === 'Hindi' ? 'hi' : 'en', // Simple mapping
+          gender: 'FEMALE'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate audio');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+
+      audio.onended = () => {
+        setPlayingAudio(null);
+        URL.revokeObjectURL(url);
+      };
+
+      audio.play();
+
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Failed to play audio",
+        variant: "destructive",
+      });
+      setPlayingAudio(null);
+    }
   };
 
   return (
@@ -183,6 +230,16 @@ const ChatCommunity = () => {
                         ))}
                       </div>
                       <div className="flex items-center gap-4 ml-auto">
+                        <button
+                          className={`flex items-center gap-1 transition-colors ${playingAudio === post.id ? 'text-primary animate-pulse' : 'text-muted-foreground hover:text-primary'}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            playAudio(post.content, post.id, post.language);
+                          }}
+                        >
+                          <Volume2 className="h-4 w-4" />
+                          <span>{playingAudio === post.id ? 'Playing...' : 'Listen'}</span>
+                        </button>
                         <button className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
                           <ThumbsUp className="h-4 w-4" />
                           <span>{post.likes}</span>

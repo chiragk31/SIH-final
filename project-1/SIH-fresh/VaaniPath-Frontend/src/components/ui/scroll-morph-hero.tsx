@@ -87,31 +87,34 @@ function FlipCard({
 
 // --- Main Hero Component ---
 const TOTAL_IMAGES = 20;
-const MAX_SCROLL = 3000; // Virtual scroll range
+const MAX_SCROLL = 1200; // Stop at arc formation (morphValue = 1)
 
 // Unsplash Images
 const IMAGES = [
-    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=300&q=80",
-    "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=300&q=80",
-    "https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&q=80",
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=300&q=80",
-    "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=300&q=80",
-    "https://images.unsplash.com/photo-1506765515384-028b60a970df?w=300&q=80",
-    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&q=80",
-    "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=300&q=80",
-    "https://images.unsplash.com/photo-1500485035595-cbe6f645feb1?w=300&q=80",
-    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&q=80",
-    "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=300&q=80",
-    "https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=300&q=80",
-    "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=300&q=80",
-    "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=300&q=80",
-    "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=300&q=80",
-    "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=300&q=80",
-    "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=300&q=80",
-    "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=300&q=80",
-    "https://images.unsplash.com/photo-1523961131990-5ea7c61b2107?w=300&q=80",
-    "https://images.unsplash.com/photo-1496568816309-51d7c20e3b21?w=300&q=80",
+    "https://tse4.mm.bing.net/th/id/OIP.8Yn96q54L7VVqsgsz-g_ggHaEo?pid=Api&P=0&h=180",
+    "https://media.cntraveller.in/wp-content/uploads/2018/10/GujaratTourism1.jpg",
+    "https://tse3.mm.bing.net/th/id/OIP.nJ0FyosaPlwie9qdQiXEywHaJQ?pid=Api&P=0&h=180",
+    "https://www.tripsavvy.com/thmb/83rnFN4SmaKQiB43M_Auxt1em4I=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/GettyImages-144451215-59213c955f9b58f4c0d45786.jpg",
+    "https://tse3.mm.bing.net/th/id/OIP.cn_TK9PWicXvt1Q5PgV4YwHaEU?pid=Api&P=0&h=180",
+    "https://tse3.mm.bing.net/th/id/OIP.UO0vBKfwsF5e6_rnonUlWgHaEH?pid=Api&P=0&h=180",
+    "https://st3.depositphotos.com/33041278/36262/i/450/depositphotos_362628318-stock-photo-sikh-people-performing-punjabi-bhangra.jpg",
+    "https://tse3.mm.bing.net/th/id/OIP.jBMkXMr9RYH7eVXaGu63UwHaEo?pid=Api&P=0&h=180",
+    "https://tse2.mm.bing.net/th/id/OIP.BG9W3DFrFGR9rowPeoXKQwHaEb?pid=Api&P=0&h=180",
+    "https://www.clubmahindra.com/blog/images/Kashmiri-attire-resized.jpg",
+    "https://tse3.mm.bing.net/th/id/OIP.dchK_V-NV2reD6kYKAPoygHaE8?pid=Api&P=0&h=180",
+    "https://tse4.mm.bing.net/th/id/OIP.yEFd098FG6YmWRheegcoHwHaJM?pid=Api&P=0&h=180",
+    "https://tse3.mm.bing.net/th/id/OIP.9pbytNa2gcMwM5ghjovWNQHaFH?pid=Api&P=0&h=180",
+    "https://blog.lemontreehotels.com/wp-content/uploads/2025/02/Cultural-Traditions-of-Goa.jpg",
+    "https://lifeontheplanetladakh.com/wp-content/uploads/2024/07/IMG_5991.jpeg",
+
+    // Repeat some to make total exactly 20
+    "https://tse4.mm.bing.net/th/id/OIP.8Yn96q54L7VVqsgsz-g_ggHaEo?pid=Api&P=0&h=180",
+    "https://media.cntraveller.in/wp-content/uploads/2018/10/GujaratTourism1.jpg",
+    "https://tse3.mm.bing.net/th/id/OIP.UO0vBKfwsF5e6_rnonUlWgHaEH?pid=Api&P=0&h=180",
+    "https://lifeontheplanetladakh.com/wp-content/uploads/2024/07/IMG_5991.jpeg",
+    "https://www.clubmahindra.com/blog/images/Kashmiri-attire-resized.jpg"
 ];
+
 
 // Helper for linear interpolation
 const lerp = (start: number, end: number, t: number) => start * (1 - t) + end * t;
@@ -155,10 +158,18 @@ export default function IntroAnimation() {
         if (!container) return;
 
         const handleWheel = (e: WheelEvent) => {
-            // Prevent default to stop browser overscroll/bounce
+            const current = scrollRef.current;
+            const delta = e.deltaY;
+
+            // If at the top and scrolling up, OR at the bottom and scrolling down -> let page scroll naturally
+            if ((current <= 0 && delta < 0) || (current >= MAX_SCROLL && delta > 0)) {
+                return;
+            }
+
+            // Otherwise, intercept scroll for animation
             e.preventDefault();
 
-            const newScroll = Math.min(Math.max(scrollRef.current + e.deltaY, 0), MAX_SCROLL);
+            const newScroll = Math.min(Math.max(current + delta, 0), MAX_SCROLL);
             scrollRef.current = newScroll;
             virtualScroll.set(newScroll);
         };
@@ -173,7 +184,16 @@ export default function IntroAnimation() {
             const deltaY = touchStartY - touchY;
             touchStartY = touchY;
 
-            const newScroll = Math.min(Math.max(scrollRef.current + deltaY, 0), MAX_SCROLL);
+            const current = scrollRef.current;
+
+            // If at the top and scrolling up, OR at the bottom and scrolling down -> let page scroll naturally
+            if ((current <= 0 && deltaY < 0) || (current >= MAX_SCROLL && deltaY > 0)) {
+                return;
+            }
+
+            if (e.cancelable) e.preventDefault();
+
+            const newScroll = Math.min(Math.max(current + deltaY, 0), MAX_SCROLL);
             scrollRef.current = newScroll;
             virtualScroll.set(newScroll);
         };
@@ -324,7 +344,7 @@ export default function IntroAnimation() {
                     style={{ opacity: contentOpacity, y: contentY }}
                     className="absolute top-[10%] z-10 flex flex-col items-center justify-center text-center pointer-events-none px-4"
                 >
-                    <h2 className="text-3xl md:text-5xl font-semibold text-gray-900 tracking-tight mb-4">
+                    <h2 className="text-3xl md:text-5xl font-semibold text-gray-900 tracking-tight mb-4 mt-4">
                         Explore Our Vision
                     </h2>
                     <p className="text-sm md:text-base text-gray-600 max-w-lg leading-relaxed">
@@ -354,7 +374,7 @@ export default function IntroAnimation() {
                             const minDimension = Math.min(containerSize.width, containerSize.height);
 
                             // A. Calculate Circle Position
-                            const circleRadius = Math.min(minDimension * 0.35, 350);
+                            const circleRadius = Math.min(minDimension * 0.28, 300);
 
                             const circleAngle = (i / TOTAL_IMAGES) * 360;
                             const circleRad = (circleAngle * Math.PI) / 180;

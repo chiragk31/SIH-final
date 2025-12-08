@@ -12,3 +12,6 @@ pydub
 groq
 elevenlabs>=0.25.1
 PyPDF2
+
+google-cloud-texttospeech>=2.14.0
+google-cloud-translate>=3.12.0

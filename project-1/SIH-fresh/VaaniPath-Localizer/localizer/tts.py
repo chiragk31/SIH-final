@@ -5,6 +5,8 @@ import re
 import asyncio
 
 from gtts import gTTS
+from google.oauth2 import service_account
+from google.cloud import texttospeech
 
 from .utils import setup_logger
 
@@ -12,6 +14,8 @@ logger = setup_logger("tts")
 
 _PRON_OVERRIDES = None
 _VOICE_MAP_CACHE = None
+_GOOGLE_CLIENT = None
+SERVICE_ACCOUNT_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "service_account.json")
 try:
     import edge_tts  # type: ignore
 except Exception:
@@ -92,6 +96,58 @@ def _tts_edge(text: str, voice: str, output_path: str, rate: str | None = None, 
     return output_path
 
 
+def _get_google_client():
+    global _GOOGLE_CLIENT
+    if _GOOGLE_CLIENT:
+        return _GOOGLE_CLIENT
+    
+    if os.path.exists(SERVICE_ACCOUNT_FILE):
+        try:
+            credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE)
+            _GOOGLE_CLIENT = texttospeech.TextToSpeechClient(credentials=credentials)
+            logger.info("Google Cloud TTS client initialized successfully.")
+        except Exception as e:
+            logger.error(f"Failed to initialize Google Cloud TTS client: {e}")
+            _GOOGLE_CLIENT = None
+    else:
+        logger.warning(f"Google service account file not found at {SERVICE_ACCOUNT_FILE}")
+    
+    return _GOOGLE_CLIENT
+
+
+def _tts_google(text: str, lang: str, output_path: str, gender: str = "NEUTRAL") -> str:
+    client = _get_google_client()
+    if not client:
+        raise RuntimeError("Google Cloud TTS client not available")
+
+    input_text = texttospeech.SynthesisInput(text=text)
+    
+    # Map gender string to enum
+    ssml_gender = texttospeech.SsmlVoiceGender.NEUTRAL
+    if gender.upper() == "MALE":
+        ssml_gender = texttospeech.SsmlVoiceGender.MALE
+    elif gender.upper() == "FEMALE":
+        ssml_gender = texttospeech.SsmlVoiceGender.FEMALE
+        
+    voice = texttospeech.VoiceSelectionParams(
+        language_code=lang,
+        ssml_gender=ssml_gender
+    )
+    
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3
+    )
+
+    response = client.synthesize_speech(
+        input=input_text, voice=voice, audio_config=audio_config
+    )
+
+    with open(output_path, "wb") as out:
+        out.write(response.audio_content)
+        
+    return output_path
+
+
 def _select_edge_voice(lang: str) -> str | None:
     # Try explicit mapping first
     voice_map = _load_voice_map()
@@ -144,7 +200,19 @@ def tts_synthesize(text: str, lang: str, output_path: str) -> str:
             logger.info(f"Saved TTS (edge-tts {voice}) to {output_path}")
             return output_path
         except Exception as e:
-            logger.error(f"edge-tts synthesis failed: {e}; falling back to gTTS")
+            logger.error(f"edge-tts synthesis failed: {e}; falling back to Google Cloud TTS")
+
+    # Fallback/Primary option: Google Cloud TTS
+    # Check if Google Client is available (credentials exist)
+    if os.path.exists(SERVICE_ACCOUNT_FILE):
+        try:
+             # Default to Neutral if not specified, or infer from somewhere if needed. 
+             # For now, default.
+             _tts_google(text_for_tts, lang, output_path)
+             logger.info(f"Saved TTS (Google Cloud) to {output_path}")
+             return output_path
+        except Exception as e:
+             logger.error(f"Google Cloud TTS failed: {e}; falling back to gTTS")
 
     # Fallback to gTTS (expects base language code like 'hi')
     base_lang = (lang or "").split("-")[0]

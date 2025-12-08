@@ -97,10 +97,12 @@ async def get_all_courses(
         if domain:
             query = query.eq("domain", domain)
         if language:
-            # Note: contains might fail if target_languages is text in DB
-            # But we can't easily fix that in query builder if it expects array
-            # For now, we'll skip language filter if it causes issues, or assume it works
-            pass 
+            # Filter where source_language IS language OR target_languages CONTAINS language
+            # Format for PostgREST array contains is cs.{"en"}
+            # We use a raw OR filter for this logic
+            # Using logic: source_language.eq.lang,target_languages.cs.{lang}
+            query = query.or_(f"source_language.eq.{language},target_languages.cs.{{{language}}}")
+
         if search:
             query = query.or_(f"title.ilike.%{search}%,description.ilike.%{search}%")
         
@@ -340,7 +342,7 @@ async def get_course_by_id(
             video_ids = [v["id"] for v in videos]
             if video_ids:
                 subtitles_response = supabase.table("translations")\
-                    .select("video_id, language, subtitle_url")\
+                    .select("video_id, language, subtitle_url, audio_url")\
                     .in_("video_id", video_ids)\
                     .eq("status", "completed")\
                     .execute()
@@ -348,11 +350,13 @@ async def get_course_by_id(
                 subtitles_map = {}
                 if subtitles_response.data:
                     for item in subtitles_response.data:
-                        if item.get("subtitle_url"):
-                            vid = item["video_id"]
-                            if vid not in subtitles_map:
-                                subtitles_map[vid] = {}
-                            subtitles_map[vid][item["language"]] = item["subtitle_url"]
+                        vid = item["video_id"]
+                        if vid not in subtitles_map:
+                            subtitles_map[vid] = {}
+                        subtitles_map[vid][item["language"]] = {
+                            "subtitle": item.get("subtitle_url"),
+                            "audio": item.get("audio_url")
+                        }
                 
                 # Attach to videos
                 for video in videos:
@@ -539,7 +543,7 @@ async def get_course_videos(
             video_ids = [v["id"] for v in videos_data]
             if video_ids:
                 subtitles_response = supabase.table("translations")\
-                    .select("video_id, language, subtitle_url")\
+                    .select("video_id, language, subtitle_url, audio_url")\
                     .in_("video_id", video_ids)\
                     .eq("status", "completed")\
                     .execute()
@@ -547,11 +551,13 @@ async def get_course_videos(
                 subtitles_map = {}
                 if subtitles_response.data:
                     for item in subtitles_response.data:
-                        if item.get("subtitle_url"):
-                            vid = item["video_id"]
-                            if vid not in subtitles_map:
-                                subtitles_map[vid] = {}
-                            subtitles_map[vid][item["language"]] = item["subtitle_url"]
+                        vid = item["video_id"]
+                        if vid not in subtitles_map:
+                            subtitles_map[vid] = {}
+                        subtitles_map[vid][item["language"]] = {
+                            "subtitle": item.get("subtitle_url"),
+                            "audio": item.get("audio_url")
+                        }
                 
                 # Attach to videos
                 for video in videos_data:

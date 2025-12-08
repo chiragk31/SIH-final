@@ -20,11 +20,11 @@ import { useTranslation } from 'react-i18next';
 import { useWalkthrough } from '@/hooks/useWalkthrough';
 
 const StudentDashboard = () => {
-    const { startStudentTour } = useWalkthrough();
+  const { startStudentTour } = useWalkthrough();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [featuredCourses, setFeaturedCourses] = useState<Course[]>([]);
@@ -36,7 +36,7 @@ const StudentDashboard = () => {
         setIsLoading(true);
         const [enrollmentsRes, coursesRes] = await Promise.all([
           getMyEnrollments().catch(() => ({ enrollments: [] })),
-          getAllCourses().catch(() => ({ courses: [] }))
+          getAllCourses({ language: i18n.language }).catch(() => ({ courses: [] }))
         ]);
 
         setEnrollments(enrollmentsRes.enrollments || []);
@@ -50,16 +50,16 @@ const StudentDashboard = () => {
 
     if (user) {
       fetchData();
-      
+
       const hasSeenTour = localStorage.getItem('hasSeenStudentTour');
       if (!hasSeenTour) {
-          setTimeout(() => {
-              startStudentTour();
-              localStorage.setItem('hasSeenStudentTour', 'true');
-          }, 1500); // Delay to allow loading
+        setTimeout(() => {
+          startStudentTour();
+          localStorage.setItem('hasSeenStudentTour', 'true');
+        }, 1500); // Delay to allow loading
       }
     }
-  }, [user]);
+  }, [user, i18n.language]);
 
   const formatDuration = (seconds?: number) => {
     if (!seconds) return 'No content';
@@ -85,10 +85,10 @@ const StudentDashboard = () => {
         >
           <div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-heading tracking-tight">
-                {t('common.welcome')}!
+              {t('common.welcome')}!
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl">
-                {t('dashboard.welcomeMessage')}
+              {t('dashboard.welcomeMessage')}
             </p>
           </div>
           <Button variant="outline" onClick={startStudentTour} className="hidden md:flex gap-2">
@@ -212,25 +212,25 @@ const StudentDashboard = () => {
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ y: -5 }}
                 >
-                  <Card className="h-full flex flex-col glass-card border-white/20 dark:border-white/10 shadow-lg hover:shadow-xl transition-all duration-300">
-                    <div className="relative aspect-video overflow-hidden rounded-t-xl bg-muted">
+                  <Card className="h-full flex flex-col glass-card border-white/20 dark:border-white/10 shadow-lg hover:shadow-2xl transition-all duration-300 hover:ring-2 hover:ring-primary/50 hover:shadow-primary/20">
+                    <div className="relative aspect-video overflow-hidden rounded-t-xl bg-muted group">
                       {course.thumbnail_url ? (
                         <img
                           src={course.thumbnail_url}
                           alt={course.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <BookOpen className="h-12 w-12 text-muted-foreground/50" />
                         </div>
                       )}
-                      <Badge className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground hover:bg-background/90">
+                      <Badge className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground hover:bg-background/90 shadow-sm">
                         {course.domain}
                       </Badge>
                     </div>
                     <CardContent className="p-4 flex-1 flex flex-col">
-                      <h3 className="font-semibold text-lg mb-2 line-clamp-2">{course.title}</h3>
+                      <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">{course.title}</h3>
                       <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
                         {course.description || t('dashboard.noDescription')}
                       </p>
@@ -246,7 +246,7 @@ const StudentDashboard = () => {
                         </div>
                       </div>
 
-                      <Button className="w-full mt-auto" asChild>
+                      <Button className="w-full mt-auto group-hover:bg-primary group-hover:text-white transition-colors" asChild>
                         <Link to={`/course/${course.id}`}>{t('common.viewCourse')}</Link>
                       </Button>
                     </CardContent>

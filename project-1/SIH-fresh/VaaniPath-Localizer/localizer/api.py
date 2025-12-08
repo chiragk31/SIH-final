@@ -17,6 +17,7 @@ from pydantic import BaseModel
 from .app import run_job, get_manifest, list_chunks, get_chunk_detail, reprocess_chunk
 from .podcast_generator import PodcastGenerator
 from .cloudinary_uploader import upload_video_to_cloudinary
+from .tts import tts_synthesize
 
 
 app = FastAPI(title="Localizer API", description="REST endpoints for video localization")
@@ -715,5 +716,39 @@ async def generate_podcast_api(
             status_code=500,
             content={"status": "error", "message": str(e)}
         )
+
+
+class DubRequest(BaseModel):
+    text: str
+    target_lang: str = "hi"
+    voice: Optional[str] = None
+    gender: Optional[str] = "FEMALE"
+
+@app.post("/dub")
+async def dub_text_endpoint(req: DubRequest):
+    """
+    Direct Text-to-Speech endpoint.
+    Uses Google Cloud TTS if available (configured via service account),
+    falling back to Edge TTS or gTTS.
+    """
+    if not req.text.strip():
+        raise HTTPException(status_code=400, detail="Text cannot be empty")
+        
+    # Create a temporary file for the output
+    job_id = f"dub_{int(time.time())}_{hash(req.text) % 10000}"
+    output_dir = os.path.join(os.path.dirname(__file__), "output", "dubs")
+    os.makedirs(output_dir, exist_ok=True)
+    filename = f"{job_id}.mp3"
+    output_path = os.path.join(output_dir, filename)
+    
+    try:
+        # Use tts_synthesize which now includes Google Cloud support
+        final_path = tts_synthesize(req.text, req.target_lang, output_path)
+        
+        return FileResponse(final_path, media_type="audio/mpeg", filename=filename)
+        
+    except Exception as e:
+        logger.error(f"Dubbing failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 

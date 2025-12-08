@@ -25,10 +25,21 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 
 const BrowseCourses = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { toast } = useToast();
     const { user, isTeacher } = useAuth();
+
+    // Sync filter with global language
+    useEffect(() => {
+        if (i18n.language) {
+            const langPart = i18n.language.split('-')[0];
+            // Only auto-select if it matches one of our filter options
+            if (['en', 'hi', 'te', 'ta', 'mr', 'bn'].includes(langPart)) {
+                setSelectedLanguage(langPart);
+            }
+        }
+    }, [i18n.language]);
 
     const [courses, setCourses] = useState<Course[]>([]);
     const [enrolledCourses, setEnrolledCourses] = useState<Set<string>>(new Set());
