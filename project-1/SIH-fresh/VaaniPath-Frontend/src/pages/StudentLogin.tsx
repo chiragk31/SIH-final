@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { INDIAN_LANGUAGES } from '@/constants/languages';
 
 const StudentLogin = () => {
   const { t } = useTranslation();
@@ -119,10 +120,12 @@ const StudentLogin = () => {
     setIsSigningUp(true);
 
     try {
+      // Pass preferred_language to signup
       await signup({
         email: signupData.email,
         password: signupData.password,
         full_name: signupData.name,
+        preferred_language: signupData.preferredLanguage,
         is_admin: false
       });
 
@@ -143,8 +146,6 @@ const StudentLogin = () => {
       setIsSigningUp(false);
     }
   };
-
-  const languages = ['English', 'Hindi', 'Bengali', 'Telugu', 'Tamil', 'Marathi', 'Gujarati', 'Kannada', 'Malayalam', 'Punjabi'];
 
   return (
     <div className="min-h-screen relative font-sans bg-background text-foreground transition-colors duration-300">
@@ -292,8 +293,10 @@ const StudentLogin = () => {
                           <SelectValue placeholder="Select Language" />
                         </SelectTrigger>
                         <SelectContent>
-                          {languages.map((lang) => (
-                            <SelectItem key={lang} value={lang.toLowerCase()}>{lang}</SelectItem>
+                          {INDIAN_LANGUAGES.map((lang) => (
+                            <SelectItem key={lang.code} value={lang.code}>
+                              {lang.name} - {lang.native}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

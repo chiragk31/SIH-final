@@ -42,8 +42,12 @@ export const enrollInCourse = async (courseId: string): Promise<Enrollment> => {
 };
 
 // Get my enrollments
-export const getMyEnrollments = async (): Promise<{ enrollments: Enrollment[]; total: number }> => {
+export const getMyEnrollments = async (params?: {
+    page?: number;
+    page_size?: number;
+}): Promise<{ enrollments: Enrollment[]; total: number; page: number; page_size: number }> => {
     const response = await axios.get(`${API_URL}/enrollments/my`, {
+        params,
         headers: getAuthHeaders(),
     });
     return response.data;

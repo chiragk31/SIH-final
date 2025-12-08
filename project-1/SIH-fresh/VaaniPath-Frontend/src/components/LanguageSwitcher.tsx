@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useUserLanguage } from '@/hooks/useUserLanguage';
 import { INDIAN_LANGUAGES } from '@/constants/languages';
 import {
     Select,
@@ -15,10 +16,10 @@ interface LanguageSwitcherProps {
 
 export const LanguageSwitcher = ({ variant = 'dropdown' }: LanguageSwitcherProps) => {
     const { i18n } = useTranslation();
+    const { setUserLanguage } = useUserLanguage();
 
-    const changeLanguage = (langCode: string) => {
-        i18n.changeLanguage(langCode);
-        localStorage.setItem('i18nextLng', langCode);
+    const changeLanguage = async (langCode: string) => {
+        await setUserLanguage(langCode);
     };
 
     if (variant === 'list') {
@@ -29,8 +30,8 @@ export const LanguageSwitcher = ({ variant = 'dropdown' }: LanguageSwitcherProps
                         key={lang.code}
                         onClick={() => changeLanguage(lang.code)}
                         className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${i18n.language === lang.code
-                                ? 'border-primary bg-primary/5'
-                                : 'border-border hover:border-primary/50'
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/50'
                             }`}
                     >
                         <span className="text-lg font-bold mb-1">{lang.native}</span>

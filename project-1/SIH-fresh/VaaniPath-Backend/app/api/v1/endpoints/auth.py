@@ -5,11 +5,17 @@ from app.api.deps import get_current_user
 from app.db.supabase_client import supabase
 from app.config import settings
 from datetime import datetime
+from pydantic import BaseModel
 import logging
 import uuid
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+
+class LanguageUpdate(BaseModel):
+    """Model for updating user's preferred language"""
+    language: str
 
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
@@ -50,7 +56,8 @@ async def signup(user: UserCreate):
             "full_name": user.full_name,
             "password_hash": hashed_password,
             "is_admin": user.is_admin,
-            "is_teacher": False
+            "is_teacher": False,
+            "preferred_language": user.preferred_language
         }
         
         try:
@@ -123,7 +130,7 @@ async def login(credentials: UserLogin):
         
         # Get user by email - select only needed fields to avoid JSON serialization issues
         try:
-            response = supabase.table("users").select("id, email, password_hash, is_admin, is_teacher, full_name").eq("email", credentials.email).execute()
+            response = supabase.table("users").select("id, email, password_hash, is_admin, is_teacher, full_name, preferred_language").eq("email", credentials.email).execute()
             
             if not response.data:
                 logger.warning(f"User not found: {credentials.email}")
@@ -160,6 +167,7 @@ async def login(credentials: UserLogin):
                 "is_teacher": user.get("is_teacher", False),
                 "is_admin": user.get("is_admin", False),
                 "avatar_url": None, # user.get("profile_picture_url"),
+                "preferred_language": user.get("preferred_language", "en"),  # User's preferred UI language
                 "created_at": datetime.utcnow() # user.get("created_at", datetime.utcnow())
             }
             
@@ -193,3 +201,40 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
     Get current user information
     """
     return current_user
+
+
+@router.patch("/me/language")
+async def update_preferred_language(
+    language_data: LanguageUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Update user's preferred UI language
+    
+    The language will be used to automatically set the interface language on login.
+    """
+    try:
+        response = supabase.table("users")\
+            .update({"preferred_language": language_data.language})\
+            .eq("id", current_user["id"])\
+            .execute()
+        
+        if not response.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        logger.info(f"✅ Language updated for user {current_user['email']}: {language_data.language}")
+        return {
+            "message": "Language preference updated successfully",
+            "language": language_data.language
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating language for user {current_user.get('id')}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update language preference"
+        )
