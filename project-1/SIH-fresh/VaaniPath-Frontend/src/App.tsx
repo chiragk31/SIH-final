@@ -97,6 +97,28 @@ const AppContent = () => {
           <Route path="/my-courses" element={<MyCourses />} />
           <Route path="/course-player/:courseId" element={<CoursePlayer />} />
           <Route path="/settings" element={<Settings />} />
+          {/* Admin Routes */}
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/tutors" element={<TutorsList />} />
+          <Route path="/admin/students" element={<StudentsList />} />
+
+          {/* Student Routes */}
+          <Route path="/homepage" element={<StudentDashboard />} />
+          <Route path="/enrolled" element={<MyCourses />} />
+          <Route path="/doubts" element={<StudentDoubts />} />
+          <Route path="/course/:courseId" element={<CourseDetails />} />
+          <Route path="/content/:videoId" element={<CourseDetail />} />
+          <Route path="/quiz/:courseId" element={<StudentQuizzes />} />
+          <Route path="/certificate/:courseId" element={<StudentCertificate />} />
+          <Route path="/rewards" element={<StudentRewards />} />
+          <Route path="/community" element={<ChatCommunity />} />
+          <Route path="/roadmap" element={<AIRoadmap />} />
+          <Route path="/feedback" element={<StudentFeedback />} />
+          <Route path="/podcast" element={<PodcastPage />} />
+          <Route path="/browse-courses" element={<BrowseCourses />} />
+          <Route path="/my-courses" element={<MyCourses />} />
+          <Route path="/course-player/:courseId" element={<CoursePlayer />} />
+          <Route path="/settings" element={<Settings />} />
 
           {/* Teacher Routes */}
           <Route path="/teacher/dashboard" element={<TeacherDashboard />} />

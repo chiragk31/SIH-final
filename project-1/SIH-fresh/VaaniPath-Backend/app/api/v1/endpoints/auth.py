@@ -88,28 +88,8 @@ async def signup(user: UserCreate):
 async def login(credentials: UserLogin):
     """
     Login and get access token
-    
-    Security Features:
-    - Rate limiting: 5 attempts per minute
-    - Account lockout: 5 failed attempts = 30 min lockout
-    - Request logging for failed attempts
     """
-    from app.core.security_middleware import (
-        check_account_lockout,
-        record_failed_login,
-        reset_failed_logins,
-        limiter
-    )
-    
     try:
-        # Check if account is locked
-        if check_account_lockout(credentials.email):
-            logger.warning(f"🔒 Account locked: {credentials.email}")
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Account temporarily locked due to too many failed login attempts. Please try again in 30 minutes."
-            )
-        
         # Check if Supabase is configured
         if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
             logger.warning("Supabase not configured, returning mock token")
@@ -127,7 +107,6 @@ async def login(credentials: UserLogin):
             
             if not response.data:
                 logger.warning(f"User not found: {credentials.email}")
-                record_failed_login(credentials.email)
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Incorrect email or password"
@@ -138,14 +117,10 @@ async def login(credentials: UserLogin):
             # Verify password
             if not verify_password(credentials.password, user["password_hash"]):
                 logger.warning(f"Invalid password for user: {credentials.email}")
-                record_failed_login(credentials.email)
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Incorrect email or password"
                 )
-            
-            # Reset failed login attempts on successful login
-            reset_failed_logins(credentials.email)
             
             # Create access token
             access_token = create_access_token(data={"sub": user["id"]})
