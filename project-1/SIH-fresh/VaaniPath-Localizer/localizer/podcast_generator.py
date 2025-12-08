@@ -8,7 +8,16 @@ import asyncio
 from pathlib import Path
 from typing import List, Dict, Optional
 import httpx
-from pydub import AudioSegment
+
+# Make pydub optional for Python 3.13 compatibility
+try:
+    from pydub import AudioSegment
+    PYDUB_AVAILABLE = True
+except (ImportError, ModuleNotFoundError) as e:
+    print(f"⚠️ pydub not available (Python 3.13 compatibility issue): {e}")
+    PYDUB_AVAILABLE = False
+    AudioSegment = None
+
 from elevenlabs.client import ElevenLabs
 import groq
 import static_ffmpeg
@@ -196,19 +205,27 @@ class PodcastGenerator:
         output_filename = f"podcast_final_{random.randint(1000, 9999)}.mp3"
         output_path = self.output_dir / output_filename
 
-        # Try merging with Pydub (requires ffmpeg)
-        try:
-            combined = AudioSegment.empty()
-            silence = AudioSegment.silent(duration=500) 
-            for seg_path in audio_segments:
-                segment = AudioSegment.from_mp3(str(seg_path))
-                combined += segment + silence
-            combined.export(str(output_path), format="mp3")
-            print("✅ Audio merged using Pydub/FFmpeg")
-        except Exception as e:
-            print(f"⚠️ Pydub merge failed (likely ffmpeg missing): {e}")
-            print("🔄 Falling back to simple file concatenation")
-            # Fallback: Simple binary concatenation (works for many MP3 players)
+        # Try merging with Pydub (requires ffmpeg and Python < 3.13)
+        if PYDUB_AVAILABLE:
+            try:
+                combined = AudioSegment.empty()
+                silence = AudioSegment.silent(duration=500) 
+                for seg_path in audio_segments:
+                    segment = AudioSegment.from_mp3(str(seg_path))
+                    combined += segment + silence
+                combined.export(str(output_path), format="mp3")
+                print("✅ Audio merged using Pydub/FFmpeg")
+            except Exception as e:
+                print(f"⚠️ Pydub merge failed: {e}")
+                print("🔄 Falling back to simple file concatenation")
+                # Fallback: Simple binary concatenation (works for many MP3 players)
+                with open(output_path, 'wb') as outfile:
+                    for seg_path in audio_segments:
+                        with open(seg_path, 'rb') as infile:
+                            outfile.write(infile.read())
+        else:
+            print("ℹ️ Pydub not available. Using simple file concatenation")
+            # Simple binary concatenation (works for many MP3 players)
             with open(output_path, 'wb') as outfile:
                 for seg_path in audio_segments:
                     with open(seg_path, 'rb') as infile:
