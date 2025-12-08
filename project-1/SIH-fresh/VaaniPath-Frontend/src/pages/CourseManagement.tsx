@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/Header';
@@ -42,6 +43,7 @@ const CourseManagement = () => {
     const { courseId } = useParams<{ courseId: string }>();
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { t } = useTranslation();
     const { isTeacher } = useAuth();
 
     const [course, setCourse] = useState<CourseWithVideos | null>(null);
@@ -52,9 +54,9 @@ const CourseManagement = () => {
         description: '',
     });
 
-    
+
     // Feedback State
-    const [feedbackVideo, setFeedbackVideo] = useState<{id: string, title: string} | null>(null);
+    const [feedbackVideo, setFeedbackVideo] = useState<{ id: string, title: string } | null>(null);
     const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
     const [selectedLanguage, setSelectedLanguage] = useState<string>('');
     const [feedbackForm, setFeedbackForm] = useState({ rating: 5, issues: [] as string[], comment: '' });
@@ -92,11 +94,11 @@ const CourseManagement = () => {
                 issues: feedbackForm.issues,
                 comment: feedbackForm.comment
             });
-            toast({ title: "Feedback Sent", description: "Thank you for your feedback!" });
-            setFeedbackVideo(null); 
+            toast({ title: t('courseManagement.feedbackSent'), description: t('courseManagement.thankYou') });
+            setFeedbackVideo(null);
             setFeedbackForm({ rating: 5, issues: [], comment: '' });
         } catch (error) {
-           toast({ title: "Error", description: "Failed to submit feedback", variant: "destructive" });
+            toast({ title: "Error", description: "Failed to submit feedback", variant: "destructive" });
         }
     };
 
@@ -217,7 +219,7 @@ const CourseManagement = () => {
                         onClick={() => navigate('/teacher/courses')}
                     >
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Courses
+                        {t('courseManagement.backToCourses')}
                     </Button>
 
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -232,7 +234,7 @@ const CourseManagement = () => {
                                 {course.title}
                             </h1>
                             <p className="text-lg text-muted-foreground max-w-3xl">
-                                {course.description || 'No description'}
+                                {course.description || t('courseManagement.noDescription')}
                             </p>
                         </div>
                         <div className="flex gap-3">
@@ -240,19 +242,19 @@ const CourseManagement = () => {
                                 <DialogTrigger asChild>
                                     <Button variant="outline">
                                         <Edit className="mr-2 h-4 w-4" />
-                                        Edit Course
+                                        {t('courseManagement.editCourse')}
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
-                                        <DialogTitle>Edit Course</DialogTitle>
+                                        <DialogTitle>{t('courseManagement.editCourse')}</DialogTitle>
                                         <DialogDescription>
-                                            Update your course title and description
+                                            {t('courseManagement.updateTitle')}
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="space-y-4 py-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="edit-title">Title</Label>
+                                            <Label htmlFor="edit-title">{t('courseManagement.title')}</Label>
                                             <Input
                                                 id="edit-title"
                                                 value={editForm.title}
@@ -262,7 +264,7 @@ const CourseManagement = () => {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="edit-description">Description</Label>
+                                            <Label htmlFor="edit-description">{t('courseManagement.description')}</Label>
                                             <Textarea
                                                 id="edit-description"
                                                 value={editForm.description}
@@ -278,9 +280,9 @@ const CourseManagement = () => {
                                             variant="outline"
                                             onClick={() => setIsEditingCourse(false)}
                                         >
-                                            Cancel
+                                            {t('courseManagement.cancel')}
                                         </Button>
-                                        <Button onClick={handleUpdateCourse}>Save Changes</Button>
+                                        <Button onClick={handleUpdateCourse}>{t('courseManagement.saveChanges')}</Button>
                                     </div>
                                 </DialogContent>
                             </Dialog>
@@ -288,14 +290,14 @@ const CourseManagement = () => {
                             <Button asChild variant="secondary">
                                 <Link to={`/course/${courseId}`}>
                                     <Play className="mr-2 h-4 w-4" />
-                                    View Course
+                                    {t('courseManagement.viewCourse')}
                                 </Link>
                             </Button>
 
                             <Button asChild>
                                 <Link to={`/teacher/upload?courseId=${courseId}`}>
                                     <Upload className="mr-2 h-4 w-4" />
-                                    Add Video
+                                    {t('courseManagement.addVideo')}
                                 </Link>
                             </Button>
                         </div>
@@ -315,7 +317,7 @@ const CourseManagement = () => {
                                 <Video className="h-8 w-8 text-primary" />
                                 <div>
                                     <p className="text-2xl font-bold">{course.total_videos || 0}</p>
-                                    <p className="text-sm text-muted-foreground">Videos</p>
+                                    <p className="text-sm text-muted-foreground">{t('courseManagement.videos')}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -327,7 +329,7 @@ const CourseManagement = () => {
                                 <Clock className="h-8 w-8 text-primary" />
                                 <div>
                                     <p className="text-2xl font-bold">{formatDuration(course.total_duration)}</p>
-                                    <p className="text-sm text-muted-foreground">Duration</p>
+                                    <p className="text-sm text-muted-foreground">{t('courseManagement.duration')}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -339,7 +341,7 @@ const CourseManagement = () => {
                                 <Languages className="h-8 w-8 text-primary" />
                                 <div>
                                     <p className="text-2xl font-bold">{course.target_languages.length}</p>
-                                    <p className="text-sm text-muted-foreground">Languages</p>
+                                    <p className="text-sm text-muted-foreground">{t('courseManagement.languages')}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -351,7 +353,7 @@ const CourseManagement = () => {
                                 <BookOpen className="h-8 w-8 text-primary" />
                                 <div>
                                     <p className="text-2xl font-bold">{course.source_language.toUpperCase()}</p>
-                                    <p className="text-sm text-muted-foreground">Source</p>
+                                    <p className="text-sm text-muted-foreground">{t('courseManagement.source')}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -366,9 +368,9 @@ const CourseManagement = () => {
                 >
                     <Card className="glass-card border-white/20 dark:border-white/10 shadow-xl">
                         <CardHeader>
-                            <CardTitle>Course Videos</CardTitle>
+                            <CardTitle>{t('courseManagement.courseVideos')}</CardTitle>
                             <CardDescription>
-                                Manage the videos in your course. Drag to reorder.
+                                {t('courseManagement.manageVideos')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -405,9 +407,9 @@ const CourseManagement = () => {
                                                     }}
                                                 >
                                                     <Languages className="mr-2 h-4 w-4" />
-                                                    Versions
+                                                    {t('courseManagement.versions')}
                                                 </Button>
-                                                
+
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
@@ -426,18 +428,18 @@ const CourseManagement = () => {
                                                     </AlertDialogTrigger>
                                                     <AlertDialogContent>
                                                         <AlertDialogHeader>
-                                                            <AlertDialogTitle>Delete Video?</AlertDialogTitle>
+                                                            <AlertDialogTitle>{t('courseManagement.deleteConfirmTitle')}</AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                Remove "{video.title}" from this course? This action cannot be undone.
+                                                                {t('courseManagement.deleteConfirmDesc', { title: video.title })}
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
-                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogCancel>{t('courseManagement.cancel')}</AlertDialogCancel>
                                                             <AlertDialogAction
                                                                 onClick={() => handleDeleteVideo(video.id, video.title)}
                                                                 className="bg-destructive hover:bg-destructive/90"
                                                             >
-                                                                Delete
+                                                                {t('courseManagement.deleteVideo')}
                                                             </AlertDialogAction>
                                                         </AlertDialogFooter>
                                                     </AlertDialogContent>
@@ -449,14 +451,14 @@ const CourseManagement = () => {
                             ) : (
                                 <div className="text-center py-12">
                                     <Video className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                                    <h3 className="text-lg font-medium mb-2">No videos yet</h3>
+                                    <h3 className="text-lg font-medium mb-2">{t('courseManagement.noVideos')}</h3>
                                     <p className="text-muted-foreground mb-6">
-                                        Start adding videos to your course
+                                        {t('courseManagement.startAdding')}
                                     </p>
                                     <Button asChild>
                                         <Link to={`/teacher/upload?courseId=${courseId}`}>
                                             <Upload className="mr-2 h-4 w-4" />
-                                            Add First Video
+                                            {t('courseManagement.addFirstVideo')}
                                         </Link>
                                     </Button>
                                 </div>
@@ -470,18 +472,18 @@ const CourseManagement = () => {
             <Dialog open={!!feedbackVideo} onOpenChange={(open) => !open && setFeedbackVideo(null)}>
                 <DialogContent className="max-w-3xl">
                     <DialogHeader>
-                        <DialogTitle>Dubbed Versions: {feedbackVideo?.title}</DialogTitle>
+                        <DialogTitle>{t('courseManagement.dubbedVersions')}: {feedbackVideo?.title}</DialogTitle>
                         <DialogDescription>
-                            Review AI-dubbed versions and provide feedback to improve accuracy.
+                            {t('courseManagement.reviewDubbed')}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
                         {/* Language List */}
                         <div className="space-y-4 border-r pr-4">
-                            <h4 className="font-semibold text-sm">Available Languages</h4>
+                            <h4 className="font-semibold text-sm">{t('courseManagement.availableLanguages')}</h4>
                             {availableLanguages.length === 0 ? (
-                                <p className="text-sm text-muted-foreground">No dubbed versions yet.</p>
+                                <p className="text-sm text-muted-foreground">{t('courseManagement.noDubbed')}</p>
                             ) : (
                                 <div className="space-y-2">
                                     {availableLanguages.map(lang => (
@@ -502,8 +504,8 @@ const CourseManagement = () => {
                         <div className="md:col-span-2 space-y-4">
                             {selectedLanguage ? (
                                 <>
-                                    <h4 className="font-semibold text-sm">Reviewing: {selectedLanguage}</h4>
-                                    
+                                    <h4 className="font-semibold text-sm">{t('courseManagement.reviewing')}: {selectedLanguage}</h4>
+
                                     {videoUrl && (
                                         <div className="aspect-video bg-black rounded-lg overflow-hidden">
                                             <video src={videoUrl} controls className="w-full h-full" />
@@ -511,14 +513,14 @@ const CourseManagement = () => {
                                     )}
 
                                     <div className="bg-muted/30 p-4 rounded-lg space-y-4">
-                                        <h5 className="font-medium text-sm">Rate Quality</h5>
+                                        <h5 className="font-medium text-sm">{t('courseManagement.rateQuality')}</h5>
                                         <div className="flex gap-1">
                                             {[1, 2, 3, 4, 5].map((star) => (
                                                 <Button
                                                     key={star}
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => setFeedbackForm({...feedbackForm, rating: star})}
+                                                    onClick={() => setFeedbackForm({ ...feedbackForm, rating: star })}
                                                     className={star <= feedbackForm.rating ? "text-yellow-500" : "text-muted-foreground"}
                                                 >
                                                     <Star className="h-5 w-5 fill-current" />
@@ -527,7 +529,7 @@ const CourseManagement = () => {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label>Issues (Optional)</Label>
+                                            <Label>{t('courseManagement.issues')}</Label>
                                             <div className="flex flex-wrap gap-2">
                                                 {['Voice Mismatch', 'Sync Issue', 'Translation Error', 'Low Audio'].map(issue => (
                                                     <Badge
@@ -538,7 +540,7 @@ const CourseManagement = () => {
                                                             const newIssues = feedbackForm.issues.includes(issue)
                                                                 ? feedbackForm.issues.filter(i => i !== issue)
                                                                 : [...feedbackForm.issues, issue];
-                                                            setFeedbackForm({...feedbackForm, issues: newIssues});
+                                                            setFeedbackForm({ ...feedbackForm, issues: newIssues });
                                                         }}
                                                     >
                                                         {issue}
@@ -548,23 +550,23 @@ const CourseManagement = () => {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label>Additional Comments</Label>
-                                            <Textarea 
+                                            <Label>{t('courseManagement.additionalComments')}</Label>
+                                            <Textarea
                                                 value={feedbackForm.comment}
-                                                onChange={e => setFeedbackForm({...feedbackForm, comment: e.target.value})}
+                                                onChange={e => setFeedbackForm({ ...feedbackForm, comment: e.target.value })}
                                                 placeholder="Describe any specific issues..."
                                             />
                                         </div>
 
                                         <Button onClick={handleSubmitFeedback} className="w-full">
-                                            Submit Feedback
+                                            {t('courseManagement.submitFeedback')}
                                         </Button>
                                     </div>
                                 </>
                             ) : (
                                 <div className="h-full flex flex-col items-center justify-center text-muted-foreground min-h-[300px]">
                                     <MessageSquare className="h-12 w-12 mb-2 opacity-20" />
-                                    <p>Select a language to review</p>
+                                    <p>{t('courseManagement.selectLanguage')}</p>
                                 </div>
                             )}
                         </div>

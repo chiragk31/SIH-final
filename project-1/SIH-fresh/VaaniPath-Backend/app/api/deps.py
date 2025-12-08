@@ -8,7 +8,7 @@ from app.db.supabase_client import supabase
 security = HTTPBearer(auto_error=False)
 
 
-async def get_current_user(
+def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
 ) -> dict:
     """
@@ -65,7 +65,11 @@ async def get_current_user(
             "full_name": user_data.get("full_name"),
             "is_admin": user_data.get("is_admin", False),
             "is_teacher": user_data.get("is_teacher", False),
-            "profile_picture_url": user_data.get("profile_picture_url"),
+            "avatar_url": user_data.get("avatar_url"),
+            "contact_number": user_data.get("contact_number"),
+            "qualification": user_data.get("qualification"),
+            "specialization": user_data.get("specialization"),
+            "domain_expertise": user_data.get("domain_expertise"),
             "bio": user_data.get("bio"),
             "preferred_language": user_data.get("preferred_language", "en"),
             "created_at": str(user_data.get("created_at")) if user_data.get("created_at") else None
@@ -125,7 +129,7 @@ async def get_current_tutor_only(
     return current_user
 
 
-async def get_optional_user(
+def get_optional_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
 ) -> Optional[dict]:
     """
@@ -135,6 +139,6 @@ async def get_optional_user(
         return None
     
     try:
-        return await get_current_user(credentials)
+        return get_current_user(credentials)
     except HTTPException:
         return None

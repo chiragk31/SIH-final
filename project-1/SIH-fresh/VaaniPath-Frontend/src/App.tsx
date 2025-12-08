@@ -42,6 +42,8 @@ import MyCourses from "./pages/MyCourses";
 import CoursePlayer from "./pages/CoursePlayer";
 import NotFound from "./pages/NotFound";
 import { Settings } from "./pages/Settings";
+import { Profile } from "./pages/Profile";
+import { ProfileData } from "./pages/ProfileData";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +100,8 @@ const AppContent = () => {
           <Route path="/my-courses" element={<MyCourses />} />
           <Route path="/course-player/:courseId" element={<CoursePlayer />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile-data" element={<ProfileData />} />
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/tutors" element={<TutorsList />} />
@@ -120,6 +124,8 @@ const AppContent = () => {
           <Route path="/my-courses" element={<MyCourses />} />
           <Route path="/course-player/:courseId" element={<CoursePlayer />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile-data" element={<ProfileData />} />
 
           {/* Teacher Routes */}
           <Route path="/teacher/dashboard" element={<TeacherDashboard />} />

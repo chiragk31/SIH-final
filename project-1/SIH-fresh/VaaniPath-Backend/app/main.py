@@ -65,6 +65,19 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+# Static Files
+try:
+    from fastapi.staticfiles import StaticFiles
+    import os
+    
+    # Ensure static directory exists
+    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    os.makedirs(static_dir, exist_ok=True)
+    
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+except Exception as e:
+    logger.warning(f"Failed to mount static files: {e}")
+
 # Include API router
 app.include_router(api_router, prefix="/api/v1")
 

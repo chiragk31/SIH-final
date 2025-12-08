@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/Header';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,13 +29,14 @@ const CoursePlayer = () => {
     const { toast } = useToast();
     const { user, isTeacher } = useAuth();
     const videoRef = useRef<HTMLVideoElement>(null);
+    const { i18n } = useTranslation();
 
     const [course, setCourse] = useState<CourseWithVideos | null>(null);
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
     const [progress, setProgress] = useState<Record<string, any>>({});
     const [isLoading, setIsLoading] = useState(true);
     const [watchedPercentage, setWatchedPercentage] = useState(0);
-    const [selectedLanguage, setSelectedLanguage] = useState('en-IN');
+    const [selectedLanguage, setSelectedLanguage] = useState(i18n.language || 'en-IN');
     const [isDubbing, setIsDubbing] = useState(false);
     const [dubbedUrl, setDubbedUrl] = useState<string | null>(null);
     const [availableLanguages, setAvailableLanguages] = useState<string[]>(['en-IN']); // Languages available for current video
@@ -75,19 +77,26 @@ const CoursePlayer = () => {
         }
     }, [currentVideo?.id]);
 
-    // Reset language and dubbed = URL when video changes
+    // Reset/Sync language and dubbed URL when video changes or global language changes
     useEffect(() => {
-        setSelectedLanguage('en-IN');
+        const globalLang = i18n.language || 'en-IN';
+        setSelectedLanguage(globalLang);
         setDubbedUrl(null);
         setIsDubbing(false);
-    }, [currentVideoIndex]);
+    }, [currentVideoIndex, i18n.language]);
 
-    // Only trigger dubbing when user explicitly changes language
+    // Trigger dubbing/check when video or language changes
     useEffect(() => {
-        if (!currentVideo || selectedLanguage === 'en-IN') return;
+        if (!currentVideo) return;
+
+        // If english (or default), just ensure clean state
+        if (selectedLanguage === 'en-IN') {
+            setDubbedUrl(null);
+            return;
+        }
 
         handleLanguageChange(selectedLanguage);
-    }, [selectedLanguage]); // Only depend on selectedLanguage, NOT currentVideo
+    }, [selectedLanguage, currentVideo?.id]); // Depend on ID to re-trigger on video switch
 
     // 🚀 Force correct subtitle track selection
     useEffect(() => {
@@ -410,16 +419,21 @@ const CoursePlayer = () => {
                                     crossOrigin="anonymous"
                                 >
                                     {/* 🚀 Subtitle Tracks */}
-                                    {currentVideo.subtitles && Object.entries(currentVideo.subtitles).map(([lang, url]) => (
-                                        <track
-                                            key={lang}
-                                            kind="subtitles"
-                                            src={url as string}
-                                            srcLang={lang}
-                                            label={INDIAN_LANGUAGES.find(l => l.code === lang)?.name || (lang === 'en' ? 'English' : lang)}
-                                            default={lang === selectedLanguage || (selectedLanguage === 'en-IN' && lang === 'en')}
-                                        />
-                                    ))}
+                                    {currentVideo.subtitles && Object.entries(currentVideo.subtitles).map(([lang, data]: [string, any]) => {
+                                        const subtitleUrl = typeof data === 'string' ? data : data?.subtitle;
+                                        if (!subtitleUrl) return null;
+
+                                        return (
+                                            <track
+                                                key={lang}
+                                                kind="subtitles"
+                                                src={subtitleUrl}
+                                                srcLang={lang}
+                                                label={INDIAN_LANGUAGES.find(l => l.code === lang)?.name || (lang === 'en' ? 'English' : lang)}
+                                                default={lang === selectedLanguage || (selectedLanguage === 'en-IN' && lang === 'en')}
+                                            />
+                                        );
+                                    })}
                                 </video>
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-white">
@@ -525,7 +539,7 @@ const CoursePlayer = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

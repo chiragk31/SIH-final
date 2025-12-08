@@ -9,6 +9,7 @@ interface AuthContextType {
     login: (credentials: LoginCredentials) => Promise<void>;
     signup: (userData: SignupData) => Promise<void>;
     logout: () => void;
+    refreshUser: () => Promise<void>;
     isAdmin: boolean;
     isTeacher: boolean;
     isStudent: boolean;
@@ -21,6 +22,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    const refreshUser = async () => {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+            try {
+                const freshUser = await getCurrentUser();
+                setUser(freshUser);
+                localStorage.setItem('user', JSON.stringify(freshUser));
+            } catch (error) {
+                console.error('Failed to refresh user data:', error);
+            }
+        }
+    };
+
     // Load user from localStorage on mount
     useEffect(() => {
         const loadUser = async () => {
@@ -31,19 +45,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 setToken(storedToken);
                 setUser(JSON.parse(storedUser));
 
-                // Refresh user data from backend
-                try {
-                    const freshUser = await getCurrentUser();
-                    setUser(freshUser);
-                    localStorage.setItem('user', JSON.stringify(freshUser));
-                } catch (error) {
-                    console.error('Failed to refresh user data:', error);
-                    // Token might be invalid
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    setToken(null);
-                    setUser(null);
-                }
+                // Initial refresh
+                await refreshUser();
             }
             setIsLoading(false);
         };
@@ -110,6 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         signup,
         logout,
+        refreshUser,
         isAdmin: user?.is_admin || false,
         isTeacher: user?.is_teacher || false,
         isStudent: !user?.is_admin && !user?.is_teacher,

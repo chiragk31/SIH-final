@@ -23,7 +23,17 @@ class UserResponse(BaseModel):
     is_admin: bool = False
     avatar_url: Optional[str] = None
     preferred_language: str = "en"  # User's preferred UI language
+    contact_number: Optional[str] = None
+    qualification: Optional[str] = None
+    specialization: Optional[str] = None
+    domain_expertise: Optional[str] = None
     created_at: datetime
+
+class UserUpdate(BaseModel):
+    contact_number: Optional[str] = None
+    qualification: Optional[str] = None
+    specialization: Optional[str] = None
+    domain_expertise: Optional[str] = None
 
 class Token(BaseModel):
     access_token: str

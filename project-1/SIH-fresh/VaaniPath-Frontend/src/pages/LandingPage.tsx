@@ -222,7 +222,7 @@ const LandingPage = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeOut" }
+      transition: { duration: 0.5 }
     }
   };
 
@@ -266,7 +266,6 @@ const LandingPage = () => {
     },
   ];
 
-  // Benefits list
   const benefits = [
     { text: t('landing.aiTranslation') || 'AI-powered instant translation', icon: Cpu },
     { text: t('landing.selfPaced') || 'Learn at your own pace', icon: Users },
@@ -274,46 +273,6 @@ const LandingPage = () => {
     { text: t('landing.interactiveLearning') || 'Interactive learning experience', icon: Languages },
     { text: t('landing.mobileFriendly') || 'Mobile-friendly platform', icon: Globe },
     { text: t('landing.freeAccess') || 'Free access to quality education', icon: Heart },
-  ];
-
-  // Course categories with color-blind safe palette
-  const categories = [
-    {
-      title: t('landing.categories.technology') || 'Technology',
-      icon: Code,
-      count: '50+ courses',
-      gradient: 'from-blue-600 to-blue-400',
-      bgColor: 'bg-blue-50 dark:bg-blue-950/20',
-      textColor: 'text-blue-800 dark:text-blue-300',
-      borderColor: 'border-blue-200 dark:border-blue-800'
-    },
-    {
-      title: t('landing.categories.business') || 'Business',
-      icon: Briefcase,
-      count: '40+ courses',
-      gradient: 'from-purple-600 to-purple-400',
-      bgColor: 'bg-purple-50 dark:bg-purple-950/20',
-      textColor: 'text-purple-800 dark:text-purple-300',
-      borderColor: 'border-purple-200 dark:border-purple-800'
-    },
-    {
-      title: t('landing.categories.design') || 'Design & Creative',
-      icon: Palette,
-      count: '35+ courses',
-      gradient: 'from-teal-600 to-teal-400',
-      bgColor: 'bg-teal-50 dark:bg-teal-950/20',
-      textColor: 'text-teal-800 dark:text-teal-300',
-      borderColor: 'border-teal-200 dark:border-teal-800'
-    },
-    {
-      title: t('landing.categories.language') || 'Languages',
-      icon: Languages,
-      count: '22 languages',
-      gradient: 'from-indigo-600 to-indigo-400',
-      bgColor: 'bg-indigo-50 dark:bg-indigo-950/20',
-      textColor: 'text-indigo-800 dark:text-indigo-300',
-      borderColor: 'border-indigo-200 dark:border-indigo-800'
-    },
   ];
 
   return (
@@ -337,7 +296,7 @@ const LandingPage = () => {
 
         {/* Main Content */}
         <main id="main-content">
-          {/* Scroll-Morph Hero Section */}
+          {/* Scroll-Morph Hero Section (UNCHANGED) */}
           <section
             className="relative h-[700px] sm:h-[800px]"
             aria-labelledby="hero-heading"
@@ -345,394 +304,367 @@ const LandingPage = () => {
             <IntroAnimation />
           </section>
 
-          {/* Animated Vocational Courses Section */}
-          <section
-            className="py-20 lg:py-28 relative bg-background/80 backdrop-blur-sm"
-            aria-labelledby="features-heading"
-          >
-            <div className="container px-4 mx-auto">
+          {/* Vocational Training Section (UNCHANGED) */}
+          {/* ========================= NEW MODERN SECTION ========================= */}
+          <section className="relative py-28 overflow-hidden bg-background/60 backdrop-blur-xl">
+
+            {/* Background soft gradients */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-3xl absolute -top-10 right-10"></div>
+              <div className="w-[350px] h-[350px] bg-purple-400/10 rounded-full blur-3xl absolute bottom-0 left-10"></div>
+            </div>
+
+            {/* SHIFTED LEFT USING lg:ml-20 */}
+            <div className="container mx-auto px-6 lg:ml-20 relative z-10 grid lg:grid-cols-2 gap-20 items-center">
+
+              {/* LEFT CONTENT */}
               <motion.div
-                {...(shouldReduceMotion ? {} : {
-                  initial: { opacity: 0, y: 20 },
-                  whileInView: { opacity: 1, y: 0 },
-                  viewport: { once: true },
-                  transition: { duration: 0.6 }
-                })}
-                className="text-center mb-16"
+                initial={{ opacity: 0, x: -40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
               >
-                <h2
-                  id="features-heading"
-                  className="text-3xl lg:text-5xl font-bold mb-4 text-foreground"
-                >
-                  Vocational Training{' '}
+                <h2 className="text-4xl lg:text-6xl font-extrabold text-foreground leading-tight mb-6">
+                  Learning That<br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                    Platform
+                    Adapts to You
                   </span>
                 </h2>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                  Industry-aligned skill development in your preferred language
+
+                <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+                  A personalized, AI-enhanced learning experience built to empower every student—no matter where they come from or what they speak.
                 </p>
+
+                <ul className="space-y-5 text-lg">
+                  {[
+                    "Smart recommendations tailored to your progress",
+                    "Minimal, distraction-free learning UI",
+                    "High-quality micro-lessons for faster learning",
+                    "Built for all devices — mobile, tablet, desktop"
+                  ].map((item, i) => (
+                    <motion.li
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.1 }}
+                      className="flex items-start space-x-3"
+                    >
+                      <CheckCircle2 className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                      <span className="text-foreground">{item}</span>
+                    </motion.li>
+                  ))}
+                </ul>
               </motion.div>
 
+              {/* RIGHT VISUAL */}
               <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
+                initial={{ opacity: 0, scale: 0.85 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
-                role="list"
+                transition={{ duration: 0.8 }}
+                className="relative w-full flex justify-center"
               >
-                {features.map((feature, index) => (
-                  <motion.article
-                    key={index}
-                    variants={itemVariants}
-                    className="group"
-                    role="listitem"
-                  >
-                    <Card
-                      className={`h-full p-6 lg:p-8 border-2 ${feature.borderColor} ${feature.hoverBg} transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 focus-within:ring-4 focus-within:ring-primary/20 focus-within:outline-none bg-card/80 backdrop-blur-sm`}
-                      tabIndex={0}
-                      role="article"
-                      aria-labelledby={`feature-${index}-title`}
-                    >
-                      <div className={`mb-6 inline-flex rounded-2xl ${feature.bg} p-4 transition-transform duration-300 group-hover:scale-110`} aria-hidden="true">
-                        <feature.icon className={`h-10 w-10 ${feature.color}`} strokeWidth={2} />
-                      </div>
-                      <h3
-                        id={`feature-${index}-title`}
-                        className="mb-3 text-xl lg:text-2xl font-bold text-foreground"
-                      >
-                        {feature.title}
-                      </h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {feature.description}
-                      </p>
-                    </Card>
-                  </motion.article>
-                ))}
+                <div className="relative w-[420px] h-[420px]">
+
+                  {/* Outer Glow Ring */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-2xl"></div>
+
+                  {/* Glass Circle */}
+                  <div className="absolute inset-0 rounded-full bg-white/30 dark:bg-slate-900/30 backdrop-blur-2xl border border-white/40 dark:border-slate-700/40 shadow-2xl"></div>
+
+                  {/* Image OR Illustration */}
+                  <img
+                    src="/images/ai-learning.png"
+                    alt="Adaptive AI Learning"
+                    className="absolute inset-0 w-full h-full object-cover rounded-full"
+                  />
+
+                </div>
               </motion.div>
+
             </div>
           </section>
 
-          {/* Why Choose Us Section */}
-          <section
-            className="py-20 lg:py-28 bg-gradient-to-b from-background/50 to-secondary/20 backdrop-blur-sm relative"
-            aria-labelledby="benefits-heading"
-          >
-            <div className="container px-4 mx-auto">
-              <div className="grid gap-12 lg:gap-16 lg:grid-cols-2 items-center">
+
+
+          {/* ===== NEW MODERN SECTION 1 – AI Showcase (OpenAI-style minimal) ===== */}
+          <section className="relative py-24 lg:py-28 bg-gradient-to-b from-background/70 to-blue-50/30 dark:from-slate-950/80 dark:to-slate-900/40 backdrop-blur-xl">
+            <div className="absolute inset-0 pointer-events-none opacity-50">
+              <div className="w-[650px] h-[650px] bg-blue-400/20 rounded-full blur-3xl absolute -top-24 -left-24" />
+              <div className="w-[500px] h-[500px] bg-purple-400/20 rounded-full blur-3xl absolute bottom-10 right-10" />
+            </div>
+
+            <div className="container mx-auto px-4 lg:px-6 relative z-10">
+              <motion.h2
+                {...(shouldReduceMotion ? {} : {
+                  initial: { opacity: 0, y: 40 },
+                  whileInView: { opacity: 1, y: 0 },
+                  viewport: { once: true },
+                  transition: { duration: 0.8 }
+                })}
+                className="text-center text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6"
+              >
+                Built for the{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                  Next Generation
+                </span>
+              </motion.h2>
+
+              <motion.p
+                {...(shouldReduceMotion ? {} : {
+                  initial: { opacity: 0 },
+                  whileInView: { opacity: 1 },
+                  viewport: { once: true },
+                  transition: { duration: 0.8, delay: 0.2 }
+                })}
+                className="text-center text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-16"
+              >
+                A modern learning platform combining AI, accessibility, and beautiful UI — crafted for learners across India, in every language.
+              </motion.p>
+
+              <div className="grid md:grid-cols-3 gap-8 lg:gap-10">
+                {[
+                  {
+                    title: 'AI Voice Localization',
+                    desc: 'Transform instructor videos into 22 languages with natural, emotion-aware AI voices.',
+                    icon: Cpu
+                  },
+                  {
+                    title: 'Immersive Learning Flows',
+                    desc: 'Clean layouts, calm animations, and zero clutter — so learners stay fully focused.',
+                    icon: Globe
+                  },
+                  {
+                    title: 'Career-Ready Skill Paths',
+                    desc: 'Vocational tracks aligned with real-world jobs, mapped to India’s evolving industries.',
+                    icon: Briefcase
+                  }
+                ].map((item, i) => (
+                  <motion.div
+                    key={item.title}
+                    {...(shouldReduceMotion ? {} : {
+                      initial: { opacity: 0, y: 40 },
+                      whileInView: { opacity: 1, y: 0 },
+                      viewport: { once: true },
+                      transition: { duration: 0.7, delay: i * 0.15 }
+                    })}
+                    className="group p-7 lg:p-8 rounded-3xl border border-white/50 dark:border-slate-800/70 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl shadow-[0_18px_45px_rgba(15,23,42,0.18)] hover:shadow-[0_26px_70px_rgba(15,23,42,0.30)] hover:-translate-y-2 transition-all duration-300"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white shadow-lg mb-6">
+                      <item.icon className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-xl lg:text-2xl font-semibold text-foreground mb-3">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ===== NEW MODERN SECTION 2 – Circular Image + Copy ===== */}
+          <section className="relative py-24 lg:py-28 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-50/60 via-transparent to-purple-50/50 dark:from-slate-950/90 dark:via-slate-900/80 dark:to-slate-900/40" />
+
+            <div className="container mx-auto px-4 lg:px-6 relative z-10">
+              <div className="grid lg:grid-cols-2 gap-16 items-center">
+                {/* Circular Image area – match the design you showed.
+                    Replace /images/vaanipath-circle.png with your actual image path */}
                 <motion.div
                   {...(shouldReduceMotion ? {} : {
-                    initial: { opacity: 0, x: -30 },
+                    initial: { opacity: 0, scale: 0.9 },
+                    whileInView: { opacity: 1, scale: 1 },
+                    viewport: { once: true },
+                    transition: { duration: 0.9 }
+                  })}
+                  className="relative w-[320px] h-[320px] sm:w-[380px] sm:h-[380px] lg:w-[420px] lg:h-[420px] mx-auto"
+                >
+                  <div className="absolute inset-0 rounded-full bg-white/40 dark:bg-slate-900/60 border border-white/60 dark:border-slate-700/80 shadow-[0_30px_80px_rgba(15,23,42,0.5)] backdrop-blur-2xl" />
+                  <img
+                    src="/images/vaanipath-circle.png"
+                    alt="VaaniPath AI-powered learning visualization"
+                    className="absolute inset-[12px] sm:inset-[16px] w-auto h-auto object-cover rounded-full"
+                  />
+                </motion.div>
+
+                {/* Text column */}
+                <motion.div
+                  {...(shouldReduceMotion ? {} : {
+                    initial: { opacity: 0, x: 40 },
                     whileInView: { opacity: 1, x: 0 },
                     viewport: { once: true },
-                    transition: { duration: 0.6 }
+                    transition: { duration: 0.8 }
                   })}
                 >
-                  <h2
-                    id="benefits-heading"
-                    className="text-3xl lg:text-5xl font-bold mb-6 leading-tight text-foreground"
-                  >
-                    Education Without{' '}
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-blue-600">
-                      Boundaries
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-5 leading-tight">
+                    The future of vocational learning —{' '}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">
+                      powered by AI
                     </span>
                   </h2>
-                  <p className="text-lg lg:text-xl text-muted-foreground mb-8 leading-relaxed">
-                    Breaking language barriers to make quality vocational education accessible to everyone
+
+                  <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl leading-relaxed">
+                    VaaniPath blends real instructors, localized content, and AI-enhanced delivery to create a calm, premium learning experience in every major Indian language.
                   </p>
-                  <ul className="space-y-4 lg:space-y-5" role="list" aria-label="Platform benefits">
-                    {benefits.map((benefit, index) => (
+
+                  <ul className="space-y-3">
+                    {[
+                      'Hyper-clear AI voiceovers tuned for regional accents.',
+                      'Minimal, modern interface designed to reduce cognitive load.',
+                      'Learn on mobile, tablet, or desktop with a consistent experience.',
+                      'Accessibility-first — WCAG 2.1 AA aligned from day one.'
+                    ].map((txt, index) => (
                       <motion.li
                         key={index}
                         {...(shouldReduceMotion ? {} : {
-                          initial: { opacity: 0, x: -20 },
+                          initial: { opacity: 0, x: -15 },
                           whileInView: { opacity: 1, x: 0 },
                           viewport: { once: true },
-                          transition: { delay: index * 0.1 }
+                          transition: { delay: index * 0.08 }
                         })}
-                        className="flex items-center space-x-4 group"
+                        className="flex items-start gap-3 text-sm md:text-base text-foreground"
                       >
-                        <div
-                          className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md"
-                          aria-hidden="true"
-                        >
-                          <benefit.icon className="h-5 w-5 text-white" strokeWidth={2.5} />
-                        </div>
-                        <span className="text-base lg:text-lg font-medium text-foreground leading-relaxed">
-                          {benefit.text}
-                        </span>
+                        <CheckCircle2 className="mt-1 w-5 h-5 text-blue-600" />
+                        <span>{txt}</span>
                       </motion.li>
                     ))}
                   </ul>
                 </motion.div>
-
-                {/* Static illustration with alt text */}
-                <motion.div
-                  {...(shouldReduceMotion ? {} : {
-                    initial: { opacity: 0, scale: 0.95 },
-                    whileInView: { opacity: 1, scale: 1 },
-                    viewport: { once: true },
-                    transition: { duration: 0.8 }
-                  })}
-                  className="relative"
-                >
-                  <div className="aspect-square rounded-3xl bg-gradient-to-br from-blue-600 via-purple-600 to-teal-600 p-1 shadow-2xl">
-                    <div className="h-full w-full bg-white dark:bg-slate-900 rounded-[1.4rem] flex items-center justify-center p-12">
-                      <div className="text-center">
-                        <div className="w-40 h-40 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center mb-8 shadow-inner">
-                          <Globe className="w-20 h-20 text-blue-600 dark:text-blue-400" aria-hidden="true" />
-                        </div>
-                        <h3 className="text-2xl lg:text-3xl font-bold mb-4 text-foreground">
-                          Global Standards
-                        </h3>
-                        <p className="text-lg text-muted-foreground">
-                          Local Languages
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
               </div>
             </div>
           </section>
 
-          {/* Course Categories Grid */}
-          <section
-            className="py-20 lg:py-28 bg-background/80 backdrop-blur-sm relative"
-            aria-labelledby="categories-heading"
-          >
-            <div className="container px-4 mx-auto">
-              <motion.div
-                {...(shouldReduceMotion ? {} : {
-                  initial: { opacity: 0, y: 20 },
-                  whileInView: { opacity: 1, y: 0 },
-                  viewport: { once: true }
-                })}
-                className="text-center mb-16"
-              >
-                <h2
-                  id="categories-heading"
-                  className="text-3xl lg:text-5xl font-bold mb-4 text-foreground"
-                >
-                  Explore{' '}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-600">
-                    Course Categories
-                  </span>
-                </h2>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                  Choose from a wide range of vocational and skill-based programs
-                </p>
-              </motion.div>
-
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4" role="list">
-                {categories.map((category, index) => (
-                  <motion.div
-                    key={index}
-                    {...(shouldReduceMotion ? {} : {
-                      initial: { opacity: 0, y: 20 },
-                      whileInView: { opacity: 1, y: 0 },
-                      viewport: { once: true },
-                      transition: { delay: index * 0.1 },
-                      whileHover: { scale: 1.05 }
-                    })}
-                    role="listitem"
-                  >
-                    <Link
-                      to="/courses"
-                      className="block group"
-                      aria-label={`View ${category.title} courses`}
-                    >
-                      <Card className={`h-full p-8 ${category.bgColor} border-2 ${category.borderColor} hover:shadow-2xl transition-all duration-300 focus-visible:ring-4 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:outline-none backdrop-blur-sm`}>
-                        <div
-                          className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${category.gradient} flex items-center justify-center mb-6 shadow-lg transition-transform duration-300 group-hover:rotate-6`}
-                          aria-hidden="true"
-                        >
-                          <category.icon className="w-10 h-10 text-white" strokeWidth={2} />
-                        </div>
-                        <h3 className={`text-2xl font-bold mb-2 ${category.textColor}`}>
-                          {category.title}
-                        </h3>
-                        <p className="text-muted-foreground font-semibold">
-                          {category.count}
-                        </p>
-                      </Card>
-                    </Link>
-                  </motion.div>
+          {/* ===== NEW MODERN SECTION 3 – Stats strip ===== */}
+          <section className="py-10 border-y border-border/60 bg-background/70 backdrop-blur-xl">
+            <div className="container mx-auto px-4 lg:px-6">
+              <div className="grid sm:grid-cols-3 gap-8 text-center">
+                {[
+                  { label: 'Learners Onboarded', value: '10,000+' },
+                  { label: 'Vocational Tracks', value: '40+' },
+                  { label: 'Indian Languages', value: '22' }
+                ].map((item) => (
+                  <div key={item.label} className="flex flex-col gap-1 items-center">
+                    <span className="text-2xl md:text-3xl font-semibold text-foreground">
+                      {item.value}
+                    </span>
+                    <span className="text-xs md:text-sm text-muted-foreground">
+                      {item.label}
+                    </span>
+                  </div>
                 ))}
               </div>
-
-              <div className="text-center mt-12">
-                <Button
-                  asChild
-                  size="lg"
-                  className="h-14 px-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-xl focus-visible:ring-4 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:outline-none"
-                >
-                  <Link to="/courses">
-                    View All Courses
-                    <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
-                  </Link>
-                </Button>
-              </div>
             </div>
           </section>
 
-          {/* CTA Section */}
-          <section
-            className="py-20 lg:py-28 bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 text-white relative overflow-hidden"
-            aria-labelledby="cta-heading"
-          >
-            <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
-            <div className="container px-4 mx-auto relative z-10 text-center">
+          {/* ===== NEW MODERN SECTION 4 – Glass CTA ===== */}
+          <section className="py-24 lg:py-28 relative">
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="w-[480px] h-[480px] bg-blue-500/10 rounded-full blur-3xl absolute -bottom-10 left-10" />
+              <div className="w-[420px] h-[420px] bg-purple-500/10 rounded-full blur-3xl absolute -top-10 right-6" />
+            </div>
+
+            <div className="container mx-auto px-4 lg:px-6 relative z-10">
               <motion.div
                 {...(shouldReduceMotion ? {} : {
-                  initial: { opacity: 0, y: 20 },
-                  whileInView: { opacity: 1, y: 0 },
-                  viewport: { once: true }
+                  initial: { opacity: 0, scale: 0.96 },
+                  whileInView: { opacity: 1, scale: 1 },
+                  viewport: { once: true },
+                  transition: { duration: 0.7 }
                 })}
+                className="max-w-4xl mx-auto rounded-[32px] border border-white/40 dark:border-slate-800/70 bg-white/50 dark:bg-slate-900/70 backdrop-blur-2xl shadow-[0_26px_70px_rgba(15,23,42,0.35)] px-8 md:px-12 py-12 md:py-14 text-center"
               >
-                <h2
-                  id="cta-heading"
-                  className="text-3xl lg:text-5xl font-bold mb-6"
-                >
-                  Ready to Start Your Learning Journey?
-                </h2>
-                <p className="text-xl mb-10 max-w-2xl mx-auto opacity-90">
-                  Join thousands of students learning vocational skills in their local language
+                <p className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-blue-50/80 dark:bg-slate-800/80 text-xs md:text-sm text-blue-700 dark:text-blue-300 mb-5 border border-blue-100/70 dark:border-slate-700/80">
+                  <Heart className="w-4 h-4" />
+                  Accessible • Multilingual • AI-enhanced
                 </p>
-                <Button
-                  asChild
-                  size="lg"
-                  className="h-16 px-12 text-xl rounded-full bg-white text-blue-700 hover:bg-yellow-300 hover:text-blue-900 shadow-2xl transition-all duration-300 focus-visible:ring-4 focus-visible:ring-yellow-300 focus-visible:ring-offset-2 focus-visible:outline-none font-bold"
-                  aria-label="Create your account now"
-                >
-                  <Link to="/login">
-                    Create Free Account
-                    <GraduationCap className="ml-3 h-6 w-6" aria-hidden="true" />
-                  </Link>
-                </Button>
+
+                <h2 className="text-3xl md:text-4xl lg:text-[2.6rem] font-bold text-foreground mb-4 leading-tight">
+                  Ready to begin your <span className="text-blue-600">learning journey</span>?
+                </h2>
+
+                <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto mb-8 md:mb-10">
+                  Create a free account and explore AI-dubbed courses, vocational programs, and localized learning experiences designed for every learner in India.
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="h-12 md:h-14 px-8 md:px-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm md:text-base font-semibold hover:opacity-90 shadow-lg"
+                  >
+                    <Link to="/login">
+                      Create Free Account
+                      <GraduationCap className="ml-2 w-5 h-5" />
+                    </Link>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    asChild
+                    size="lg"
+                    className="h-12 md:h-14 px-7 rounded-full border-border/70 bg-background/70 text-xs md:text-sm"
+                  >
+                    <Link to="/courses">
+                      Preview Courses
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
+                  </Button>
+                </div>
               </motion.div>
             </div>
           </section>
         </main>
 
-        {/* Professional Dark Footer */}
+        {/* ===== NEW MINIMAL FUTURISTIC FOOTER ===== */}
         <footer
-          className="bg-slate-900 text-slate-100 py-16 border-t-4 border-blue-600 relative"
+          className="bg-slate-950 text-slate-200 py-10 border-t border-slate-800"
           role="contentinfo"
           aria-label="Site footer"
         >
-          <div className="container px-4 mx-auto">
-            <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4 mb-12">
-              {/* About */}
-              <div>
-                <h3 className="text-xl font-bold mb-4 text-white">
-                  About VaaniPath
+          <div className="container px-4 lg:px-6 mx-auto">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="text-center md:text-left">
+                <h3 className="text-lg font-semibold text-white">
+                  VaaniPath
                 </h3>
-                <p className="text-slate-300 mb-4 leading-relaxed text-sm">
-                  Empowering vocational education through multilingual accessibility and AI-powered localization technology.
+                <p className="text-xs md:text-sm text-slate-400 mt-1">
+                  AI-powered multilingual vocational learning for every learner in India.
                 </p>
-                <div className="flex items-center space-x-2 text-slate-300 text-sm">
-                  <MapPin className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                  <span>Serving All of India</span>
-                </div>
               </div>
 
-              {/* Quick Links */}
-              <div>
-                <h3 className="text-xl font-bold mb-4 text-white">
-                  Quick Links
-                </h3>
-                <nav aria-label="Footer navigation">
-                  <ul className="space-y-3">
-                    {['Courses', 'About Us', 'Contact', 'Blog'].map((item) => (
-                      <li key={item}>
-                        <Link
-                          to={`/${item.toLowerCase().replace(' ', '')}`}
-                          className="text-slate-300 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:outline-none rounded px-1 text-sm"
-                        >
-                          {item}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-              </div>
-
-              {/* Legal */}
-              <div>
-                <h3 className="text-xl font-bold mb-4 text-white">
-                  Legal
-                </h3>
-                <nav aria-label="Legal navigation">
-                  <ul className="space-y-3">
-                    {['Privacy Policy', 'Terms of Service', 'Accessibility', 'WCAG Compliance'].map((item) => (
-                      <li key={item}>
-                        <Link
-                          to={`/${item.toLowerCase().replace(/ /g, '-')}`}
-                          className="text-slate-300 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:outline-none rounded px-1 text-sm"
-                        >
-                          {item}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-              </div>
-
-              {/* Contact & Social */}
-              <div>
-                <h3 className="text-xl font-bold mb-4 text-white">
-                  Connect With Us
-                </h3>
-                <div className="flex space-x-3 mb-6" role="list" aria-label="Social media links">
-                  {[
-                    { icon: Facebook, label: 'Facebook', href: 'https://facebook.com' },
-                    { icon: Twitter, label: 'Twitter', href: 'https://twitter.com' },
-                    { icon: Linkedin, label: 'LinkedIn', href: 'https://linkedin.com' },
-                    { icon: Instagram, label: 'Instagram', href: 'https://instagram.com' }
-                  ].map(({ icon: Icon, label, href }) => (
-                    <a
-                      key={label}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-11 h-11 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-all duration-300 focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:outline-none"
-                      aria-label={`Follow us on ${label}`}
-                    >
-                      <Icon className="w-5 h-5" aria-hidden="true" />
-                    </a>
-                  ))}
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2 text-slate-300 text-sm">
-                    <Mail className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                    <a
-                      href="mailto:support@vaanipath.edu"
-                      className="hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:outline-none rounded px-1"
-                    >
-                      support@vaanipath.edu
-                    </a>
-                  </div>
-                  <div className="flex items-center space-x-2 text-slate-300 text-sm">
-                    <Phone className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                    <a
-                      href="tel:+911234567890"
-                      className="hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:outline-none rounded px-1"
-                    >
-                      +91 123 456 7890
-                    </a>
-                  </div>
-                </div>
+              <div className="flex items-center gap-4" aria-label="Social media links">
+                {[
+                  { icon: Facebook, label: 'Facebook', href: 'https://facebook.com' },
+                  { icon: Twitter, label: 'Twitter', href: 'https://twitter.com' },
+                  { icon: Linkedin, label: 'LinkedIn', href: 'https://linkedin.com' },
+                  { icon: Instagram, label: 'Instagram', href: 'https://instagram.com' }
+                ].map(({ icon: Icon, label, href }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-full bg-slate-900 hover:bg-blue-600 flex items-center justify-center transition-colors"
+                    aria-label={`Follow us on ${label}`}
+                  >
+                    <Icon className="w-4 h-4" aria-hidden="true" />
+                  </a>
+                ))}
               </div>
             </div>
 
-            <div className="pt-8 border-t border-slate-800 text-center">
-              <p className="text-slate-400 text-sm">
+            <div className="mt-6 pt-4 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] md:text-xs text-slate-500">
+              <span>
                 © 2025 VaaniPath Education Platform. All rights reserved.
-                <span className="mx-3">•</span>
-                <span className="text-blue-400 font-medium">WCAG 2.1 AA Compliant</span>
-              </p>
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                WCAG 2.1 AA Compliant
+              </span>
             </div>
           </div>
         </footer>
