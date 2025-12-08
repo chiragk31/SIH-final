@@ -17,6 +17,7 @@ class VideoUpload(BaseModel):
     domain: str
     source_language: str = "en"
     target_languages: List[str]
+    tutor_gender: Optional[str] = "male"
 
 class VideoResponse(BaseModel):
     id: str
@@ -25,6 +26,7 @@ class VideoResponse(BaseModel):
     domain: str
     source_language: str
     target_languages: List[str]
+    tutor_gender: Optional[str] = None
     file_url: Optional[str] = None  # Changed from cloudinary_url to match database
     thumbnail_url: Optional[str] = None
     duration: Optional[float] = None
@@ -59,3 +61,10 @@ class VideoList(BaseModel):
 class WatchProgress(BaseModel):
     progress_percentage: float
     last_position: Optional[float] = None
+    
+class DubbingFeedbackCreate(BaseModel):
+    video_id: str
+    language: str
+    rating: int
+    issues: List[str]
+    comment: Optional[str] = None

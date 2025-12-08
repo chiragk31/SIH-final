@@ -83,7 +83,7 @@ export const Header = ({ isAuthenticated = false, userType, userName = "User", o
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Link to={isAuthenticated ? (userType === 'student' ? '/homepage' : '/teacher/dashboard') : '/landingpage'} className="flex items-center space-x-2">
+        <Link id="header-logo" to={isAuthenticated ? (userType === 'student' ? '/homepage' : '/teacher/dashboard') : '/landingpage'} className="flex items-center space-x-2">
           <div className="rounded-lg bg-gradient-primary p-2">
             <GraduationCap className="h-6 w-6 text-primary-foreground" />
           </div>
@@ -94,7 +94,7 @@ export const Header = ({ isAuthenticated = false, userType, userName = "User", o
 
         {/* Desktop Navigation */}
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav id="header-nav" className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
             <Link
               key={link.path}
@@ -122,7 +122,7 @@ export const Header = ({ isAuthenticated = false, userType, userName = "User", o
           <ThemeToggle />
 
           {isAuthenticated ? (
-            <div className="hidden md:block">
+            <div className="hidden md:block" id="student-profile">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">

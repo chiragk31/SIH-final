@@ -14,6 +14,7 @@ export interface Video {
     duration?: number;
     uploaded_by: string;
     created_at: string;
+    tutor_gender?: string;
 }
 
 export interface VideoListResponse {
@@ -30,6 +31,7 @@ export interface VideoUploadData {
     source_language: string;
     target_languages: string;
     course_id: string;
+    tutor_gender: string;
 }
 
 // Upload video with progress tracking
@@ -46,6 +48,7 @@ export const uploadVideo = async (
     formData.append('source_language', data.source_language);
     formData.append('target_languages', data.target_languages);
     formData.append('course_id', data.course_id);
+    formData.append('tutor_gender', data.tutor_gender);
 
     const response = await api.post<Video>('/videos/upload', formData, {
         headers: {
@@ -94,6 +97,29 @@ export const enrollInCourse = async (videoId: string): Promise<{ message: string
 // Get enrolled videos
 export const getEnrolledVideos = async (page: number = 1, pageSize: number = 20): Promise<VideoListResponse> => {
     const response = await api.get<VideoListResponse>(`/videos/?page=${page}&page_size=${pageSize}&enrolled=true`);
+    return response.data;
+};
+
+export interface DubbingFeedback {
+    video_id: string;
+    language: string;
+    rating: number;
+    issues: string[];
+    comment?: string;
+}
+
+export const submitDubbingFeedback = async (videoId: string, feedback: DubbingFeedback): Promise<any> => {
+    const response = await api.post(`/videos/${videoId}/dubbing-feedback`, feedback);
+    return response.data;
+};
+
+export const getAvailableLanguages = async (videoId: string): Promise<{video_id: string, available_languages: string[]}> => {
+    const response = await api.get(`/videos/${videoId}/available-languages`);
+    return response.data;
+};
+
+export const getDubbedVideoUrl = async (videoId: string, language: string): Promise<{url: string}> => {
+    const response = await api.get(`/videos/${videoId}/dubbed/${language}`);
     return response.data;
 };
 

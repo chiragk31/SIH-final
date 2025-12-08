@@ -8,18 +8,22 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { GraduationCap, ArrowLeft, Loader2 } from 'lucide-react';
+import { GraduationCap, ArrowLeft, Loader2, Info } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { INDIAN_LANGUAGES } from '@/constants/languages';
+import { useWalkthrough } from '@/hooks/useWalkthrough';
 
 const StudentLogin = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { login, signup } = useAuth();
+  const { startStudentLoginTour } = useWalkthrough();
 
   // Login state
   const [loginEmail, setLoginEmail] = useState('');
@@ -38,6 +42,7 @@ const StudentLogin = () => {
     city: '',
   });
   const [isSigningUp, setIsSigningUp] = useState(false);
+  const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +122,15 @@ const StudentLogin = () => {
       return;
     }
 
+    if (!hasAgreedToTerms) {
+      toast({
+        title: 'Terms Required',
+        description: 'Please agree to the terms and conditions',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSigningUp(true);
 
     try {
@@ -168,11 +182,16 @@ const StudentLogin = () => {
             >
               <GraduationCap className="h-10 w-10 text-primary" />
             </motion.div>
-            <h1 className="text-4xl font-bold mb-3 text-foreground font-heading tracking-tight">{t('auth.studentPortal')}</h1>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <h1 className="text-4xl font-bold text-foreground font-heading tracking-tight">{t('auth.studentPortal')}</h1>
+              <Button variant="ghost" size="icon" onClick={startStudentLoginTour} className="rounded-full hover:bg-primary/10" title="Start Tour">
+                <Info className="h-6 w-6 text-primary" />
+              </Button>
+            </div>
             <p className="text-lg text-muted-foreground">{t('auth.studentSubtitle')}</p>
           </div>
 
-          <Card className="glass-card border-white/20 dark:border-white/10 shadow-2xl overflow-hidden relative">
+          <Card id="student-login-card" className="glass-card border-white/20 dark:border-white/10 shadow-2xl overflow-hidden relative">
             {/* Subtle top highlight */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50" />
 
@@ -190,8 +209,18 @@ const StudentLogin = () => {
                   </div>
                   <form onSubmit={handleLogin} className="space-y-5">
                     <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="login-email">{t('auth.studentEmail')}</Label>
+                      <div id="student-email-section" className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="login-email">{t('auth.studentEmail')}</Label>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Please enter your registered email. Ensure it is a valid Gmail address.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
                         <Input
                           id="login-email"
                           type="email"
@@ -202,9 +231,19 @@ const StudentLogin = () => {
                           className="bg-background/50 border-input focus:ring-primary h-11 transition-all hover:border-primary/50"
                         />
                       </div>
-                      <div className="space-y-2">
+                      <div id="student-password-section" className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label htmlFor="login-password">{t('auth.password')}</Label>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="login-password">{t('auth.password')}</Label>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Enter your secure password. Make sure it is correct.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
                           <a href="#" className="text-xs text-primary hover:underline">{t('auth.forgotPassword')}</a>
                         </div>
                         <Input
@@ -218,6 +257,7 @@ const StudentLogin = () => {
                       </div>
                     </div>
                     <Button
+                      id="student-login-btn"
                       type="submit"
                       className="w-full h-12 text-base font-medium shadow-lg hover:shadow-primary/25 transition-all duration-300 bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5"
                       disabled={isLoggingIn}
@@ -250,7 +290,17 @@ const StudentLogin = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email Address <span className="text-destructive" aria-label="required">*</span> <span className="text-xs text-muted-foreground">(required)</span></Label>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="signup-email">Email Address <span className="text-destructive" aria-label="required">*</span> <span className="text-xs text-muted-foreground">(required)</span></Label>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Please use a valid Gmail address for registration.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <Input
                         id="signup-email"
                         type="email"
@@ -263,7 +313,17 @@ const StudentLogin = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="signup-password">Password <span className="text-destructive" aria-label="required">*</span> <span className="text-xs text-muted-foreground">(required)</span></Label>
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="signup-password">Password <span className="text-destructive" aria-label="required">*</span> <span className="text-xs text-muted-foreground">(required)</span></Label>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Create a strong password to secure your account.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
                         <Input
                           id="signup-password"
                           type="password"

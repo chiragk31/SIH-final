@@ -33,8 +33,9 @@ import { getCourseById, updateCourse, CourseWithVideos } from '@/services/course
 import { deleteVideo } from '@/services/videos';
 import {
     BookOpen, Upload, Video, Trash2, Edit, ArrowLeft,
-    GripVertical, Play, Clock, Languages
+    GripVertical, Play, Clock, Languages, MessageSquare, Star, Check
 } from 'lucide-react';
+import { getAvailableLanguages, getDubbedVideoUrl, submitDubbingFeedback } from '@/services/videos';
 import { motion } from 'framer-motion';
 
 const CourseManagement = () => {
@@ -50,6 +51,54 @@ const CourseManagement = () => {
         title: '',
         description: '',
     });
+
+    
+    // Feedback State
+    const [feedbackVideo, setFeedbackVideo] = useState<{id: string, title: string} | null>(null);
+    const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
+    const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+    const [feedbackForm, setFeedbackForm] = useState({ rating: 5, issues: [] as string[], comment: '' });
+    const [videoUrl, setVideoUrl] = useState<string>('');
+
+    const loadLanguages = async (videoId: string) => {
+        try {
+            const data = await getAvailableLanguages(videoId);
+            setAvailableLanguages(data.available_languages);
+            setSelectedLanguage('');
+            setVideoUrl('');
+        } catch (error) {
+            console.error("Failed to load languages", error);
+        }
+    };
+
+    const handleLanguageSelect = async (lang: string) => {
+        setSelectedLanguage(lang);
+        if (!feedbackVideo) return;
+        try {
+            const data = await getDubbedVideoUrl(feedbackVideo.id, lang);
+            setVideoUrl(data.url);
+        } catch (error) {
+            toast({ title: "Error", description: "Version unavailable", variant: "destructive" });
+        }
+    };
+
+    const handleSubmitFeedback = async () => {
+        if (!feedbackVideo || !selectedLanguage) return;
+        try {
+            await submitDubbingFeedback(feedbackVideo.id, {
+                video_id: feedbackVideo.id,
+                language: selectedLanguage,
+                rating: feedbackForm.rating,
+                issues: feedbackForm.issues,
+                comment: feedbackForm.comment
+            });
+            toast({ title: "Feedback Sent", description: "Thank you for your feedback!" });
+            setFeedbackVideo(null); 
+            setFeedbackForm({ rating: 5, issues: [], comment: '' });
+        } catch (error) {
+           toast({ title: "Error", description: "Failed to submit feedback", variant: "destructive" });
+        }
+    };
 
     useEffect(() => {
         if (!isTeacher) {
@@ -343,7 +392,22 @@ const CourseManagement = () => {
                                                 </p>
                                             </div>
 
+
+
                                             <div className="flex gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="hidden md:flex"
+                                                    onClick={() => {
+                                                        setFeedbackVideo({ id: video.id, title: video.title });
+                                                        loadLanguages(video.id);
+                                                    }}
+                                                >
+                                                    <Languages className="mr-2 h-4 w-4" />
+                                                    Versions
+                                                </Button>
+                                                
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
@@ -401,6 +465,112 @@ const CourseManagement = () => {
                     </Card>
                 </motion.div>
             </div>
+
+            {/* Feedback Dialog */}
+            <Dialog open={!!feedbackVideo} onOpenChange={(open) => !open && setFeedbackVideo(null)}>
+                <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>Dubbed Versions: {feedbackVideo?.title}</DialogTitle>
+                        <DialogDescription>
+                            Review AI-dubbed versions and provide feedback to improve accuracy.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+                        {/* Language List */}
+                        <div className="space-y-4 border-r pr-4">
+                            <h4 className="font-semibold text-sm">Available Languages</h4>
+                            {availableLanguages.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">No dubbed versions yet.</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {availableLanguages.map(lang => (
+                                        <Button
+                                            key={lang}
+                                            variant={selectedLanguage === lang ? "default" : "outline"}
+                                            className="w-full justify-start"
+                                            onClick={() => handleLanguageSelect(lang)}
+                                        >
+                                            {lang}
+                                        </Button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Player & Feedback */}
+                        <div className="md:col-span-2 space-y-4">
+                            {selectedLanguage ? (
+                                <>
+                                    <h4 className="font-semibold text-sm">Reviewing: {selectedLanguage}</h4>
+                                    
+                                    {videoUrl && (
+                                        <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                                            <video src={videoUrl} controls className="w-full h-full" />
+                                        </div>
+                                    )}
+
+                                    <div className="bg-muted/30 p-4 rounded-lg space-y-4">
+                                        <h5 className="font-medium text-sm">Rate Quality</h5>
+                                        <div className="flex gap-1">
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <Button
+                                                    key={star}
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => setFeedbackForm({...feedbackForm, rating: star})}
+                                                    className={star <= feedbackForm.rating ? "text-yellow-500" : "text-muted-foreground"}
+                                                >
+                                                    <Star className="h-5 w-5 fill-current" />
+                                                </Button>
+                                            ))}
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label>Issues (Optional)</Label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {['Voice Mismatch', 'Sync Issue', 'Translation Error', 'Low Audio'].map(issue => (
+                                                    <Badge
+                                                        key={issue}
+                                                        variant={feedbackForm.issues.includes(issue) ? "destructive" : "outline"}
+                                                        className="cursor-pointer"
+                                                        onClick={() => {
+                                                            const newIssues = feedbackForm.issues.includes(issue)
+                                                                ? feedbackForm.issues.filter(i => i !== issue)
+                                                                : [...feedbackForm.issues, issue];
+                                                            setFeedbackForm({...feedbackForm, issues: newIssues});
+                                                        }}
+                                                    >
+                                                        {issue}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label>Additional Comments</Label>
+                                            <Textarea 
+                                                value={feedbackForm.comment}
+                                                onChange={e => setFeedbackForm({...feedbackForm, comment: e.target.value})}
+                                                placeholder="Describe any specific issues..."
+                                            />
+                                        </div>
+
+                                        <Button onClick={handleSubmitFeedback} className="w-full">
+                                            Submit Feedback
+                                        </Button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="h-full flex flex-col items-center justify-center text-muted-foreground min-h-[300px]">
+                                    <MessageSquare className="h-12 w-12 mb-2 opacity-20" />
+                                    <p>Select a language to review</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

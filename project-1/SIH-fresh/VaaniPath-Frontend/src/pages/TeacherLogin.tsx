@@ -6,17 +6,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, ArrowLeft, Loader2, Lock } from 'lucide-react';
+import { BookOpen, ArrowLeft, Loader2, Lock, Info, HelpCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useWalkthrough } from '@/hooks/useWalkthrough';
 
 const TeacherLogin = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { login } = useAuth();
+  const { startTeacherLoginTour } = useWalkthrough();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -84,11 +87,16 @@ const TeacherLogin = () => {
             >
               <BookOpen className="h-10 w-10 text-secondary-foreground" />
             </motion.div>
-            <h1 className="text-4xl font-bold mb-3 text-foreground font-heading tracking-tight">{t('auth.teacherPortal')}</h1>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <h1 className="text-4xl font-bold text-foreground font-heading tracking-tight">{t('auth.teacherPortal')}</h1>
+              <Button variant="ghost" size="icon" onClick={startTeacherLoginTour} className="rounded-full hover:bg-secondary/10" title="Start Tour">
+                <HelpCircle className="h-6 w-6 text-secondary" />
+              </Button>
+            </div>
             <p className="text-lg text-muted-foreground">{t('auth.teacherSubtitle')}</p>
           </div>
 
-          <Card className="glass-card border-white/20 dark:border-white/10 shadow-2xl overflow-hidden relative group">
+          <Card id="teacher-login-card" className="glass-card border-white/20 dark:border-white/10 shadow-2xl overflow-hidden relative group">
             {/* Subtle top highlight */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-secondary/50 to-transparent opacity-50" />
 
@@ -99,8 +107,18 @@ const TeacherLogin = () => {
               </div>
 
               <div className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground/80">{t('auth.emailAddress')}</Label>
+                <div id="teacher-email-section" className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="email" className="text-foreground/80">{t('auth.emailAddress')}</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Please enter your registered educator email. Ensure it is a valid Gmail address.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <div className="relative">
                     <Input
                       id="email"
@@ -115,10 +133,20 @@ const TeacherLogin = () => {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-foreground/80">{t('auth.password')}</Label>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="password" className="text-foreground/80">{t('auth.password')}</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Enter your secure password. Make sure it is correct.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <a href="#" className="text-xs text-secondary-foreground hover:underline">{t('auth.forgotPassword')}</a>
                   </div>
-                  <div className="relative">
+                  <div id="teacher-password-section" className="relative">
                     <Input
                       id="password"
                       type="password"
@@ -133,6 +161,7 @@ const TeacherLogin = () => {
 
               <div className="pt-2">
                 <Button
+                  id="teacher-login-btn"
                   type="submit"
                   className="w-full h-12 text-base font-medium shadow-lg hover:shadow-secondary/25 transition-all duration-300 bg-secondary text-secondary-foreground hover:bg-secondary/90 hover:-translate-y-0.5"
                   disabled={isLoggingIn}

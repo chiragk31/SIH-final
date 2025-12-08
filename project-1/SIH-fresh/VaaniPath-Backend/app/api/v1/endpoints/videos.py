@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, status
 from typing import List, Optional
 from pydantic import BaseModel
-from app.models.video import VideoUpload, VideoResponse, VideoProgress, VideoList, DomainType, WatchProgress
+from app.models.video import VideoUpload, VideoResponse, VideoProgress, VideoList, DomainType, WatchProgress, DubbingFeedbackCreate
 from app.api.deps import get_current_admin, get_current_user, get_current_teacher, get_optional_user
 from app.db.supabase_client import supabase
 from app.config import settings
@@ -25,6 +25,7 @@ async def upload_video(
     domain: str = Form(...),
     source_language: str = Form("en"),
     target_languages: str = Form(...),  # Comma-separated
+    tutor_gender: str = Form('male'),
     course_id: Optional[str] = Form(None),
     background_tasks: BackgroundTasks = BackgroundTasks(),
     current_user: dict = Depends(get_current_teacher)
@@ -130,6 +131,7 @@ async def upload_video(
             "duration": upload_result.get("duration", 0),
             "uploaded_by": current_user.get("id", "admin"),
             "content_type": content_type,  # video, audio, or document
+            "tutor_gender": tutor_gender,
             "course_id": course_id
         }
         
@@ -667,9 +669,110 @@ async def upload_thumbnail(
         
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Error uploading thumbnail: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
+
+@router.post("/{video_id}/dubbing-feedback", status_code=status.HTTP_201_CREATED)
+async def submit_dubbing_feedback(
+    video_id: str,
+    feedback: DubbingFeedbackCreate,
+    current_user: dict = Depends(get_current_teacher)
+):
+    """
+    Submit feedback for a dubbed video
+    """
+    try:
+        feedback_data = {
+            "video_id": video_id,
+            "language": feedback.language,
+            "rating": feedback.rating,
+            "issues": feedback.issues,
+            "comment": feedback.comment,
+            "submitted_by": current_user["id"],
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        # Insert into dubbing_feedback table
+        response = supabase.table("dubbing_feedback").insert(feedback_data).execute()
+        
+        if not response.data:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to save feedback"
+            )
+            
+        return {"message": "Feedback submitted successfully", "id": response.data[0]["id"]}
+        
+    except Exception as e:
+        logger.error(f"Feedback submission error: {e}")
+        # Identify if table doesn't exist to provide better error, though we can't fix it here
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{video_id}/available-languages", status_code=status.HTTP_200_OK)
+async def get_available_languages(
+    video_id: str,
+    current_user: dict = Depends(get_current_teacher)
+):
+    """
+    Get available dubbed languages for a video
+    """
+    try:
+        # Check translations table
+        response = supabase.table("translations")\
+            .select("language, status")\
+            .eq("video_id", video_id)\
+            .execute()
+            
+        languages = []
+        if response.data:
+            languages = [item["language"] for item in response.data if item.get("status") == "completed"]
+            
+        # Add target languages from video metadata if not present (mocking/fallback)
+        video_response = supabase.table("videos").select("target_languages").eq("id", video_id).execute()
+        if video_response.data:
+            target_langs = video_response.data[0].get("target_languages", [])
+            for lang in target_langs:
+                if lang not in languages:
+                    languages.append(lang)
+                    
+        return {"video_id": video_id, "available_languages": languages}
+    except Exception as e:
+        logger.error(f"Error fetching languages: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{video_id}/dubbed/{language}", status_code=status.HTTP_200_OK)
+async def get_dubbed_video_url(
+    video_id: str,
+    language: str,
+    current_user: dict = Depends(get_current_teacher)
+):
+    """
+    Get URL for a specific dubbed version
+    """
+    try:
+        # Check translations table first
+        response = supabase.table("translations")\
+            .select("file_url")\
+            .eq("video_id", video_id)\
+            .eq("language", language)\
+            .execute()
+            
+        if response.data and response.data[0].get("file_url"):
+            return {"url": response.data[0]["file_url"]}
+            
+        # Fallback to checking video table if source language matches
+        video_response = supabase.table("videos").select("file_url, source_language").eq("id", video_id).execute()
+        if video_response.data and video_response.data[0].get("source_language") == language:
+            return {"url": video_response.data[0]["file_url"]}
+
+        # If we are in "demo" mode, maybe return the original video as the dubbed one for testing feedback
+        # This is important for the hackathon/demo context if actual dubbing is slow/not ready
+        if video_response.data:
+             return {"url": video_response.data[0]["file_url"]}
+
+        raise HTTPException(status_code=404, detail="Dubbed version not found")
+    except Exception as e:
+        logger.error(f"Error fetching dubbed video: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

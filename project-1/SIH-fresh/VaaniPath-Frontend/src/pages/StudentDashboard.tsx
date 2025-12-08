@@ -12,12 +12,15 @@ import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { getAllCourses, Course } from '@/services/courses';
 import { getMyEnrollments, Enrollment } from '@/services/enrollments';
 import {
-  BookOpen, Search, ArrowRight, Play, Video, Clock, CheckCircle2, Settings as SettingsIcon
+  BookOpen, Search, ArrowRight, Play, Video, Clock, CheckCircle2, Settings as SettingsIcon, Info
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
+import { useWalkthrough } from '@/hooks/useWalkthrough';
+
 const StudentDashboard = () => {
+    const { startStudentTour } = useWalkthrough();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -47,6 +50,14 @@ const StudentDashboard = () => {
 
     if (user) {
       fetchData();
+      
+      const hasSeenTour = localStorage.getItem('hasSeenStudentTour');
+      if (!hasSeenTour) {
+          setTimeout(() => {
+              startStudentTour();
+              localStorage.setItem('hasSeenStudentTour', 'true');
+          }, 1500); // Delay to allow loading
+      }
     }
   }, [user]);
 
@@ -70,14 +81,20 @@ const StudentDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-12"
+          className="mb-12 flex justify-between items-start"
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-heading tracking-tight">
-            {t('common.welcome')}!
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl">
-            {t('dashboard.welcomeMessage')}
-          </p>
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-heading tracking-tight">
+                {t('common.welcome')}!
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+                {t('dashboard.welcomeMessage')}
+            </p>
+          </div>
+          <Button variant="outline" onClick={startStudentTour} className="hidden md:flex gap-2">
+            <Info className="h-4 w-4" />
+            {t('common.guideMe') || 'Guide Me'}
+          </Button>
         </motion.div>
 
         {/* Continue Learning Section */}
@@ -87,6 +104,7 @@ const StudentDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mb-16"
+            id="continue-learning"
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -152,6 +170,7 @@ const StudentDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
+          id="featured-courses"
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -240,7 +259,8 @@ const StudentDashboard = () => {
       </div>
       <Link
         to="/settings"
-        className="fixed bottom-8 right-8 z-50 p-4 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-110"
+        className="fixed bottom-8 right-8 z-[100] p-4 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center"
+        title="Settings"
       >
         <SettingsIcon className="h-6 w-6" />
       </Link>
