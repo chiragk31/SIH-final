@@ -16,7 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { getAllCourses, Course } from '@/services/courses';
-import { enrollInCourse, isEnrolledInCourse, getMyEnrollments } from '@/services/enrollments';
+import { enrollInCourse, isEnrolledInCourse, getMyEnrollments, Enrollment } from '@/services/enrollments';
 import {
     BookOpen, Search, Filter, X, Video, Clock, Languages, Users, Check, ChevronsLeft, ChevronsRight
 } from 'lucide-react';
@@ -54,7 +54,7 @@ const BrowseCourses = () => {
 
     const { data: enrollmentsData } = useQuery({
         queryKey: ['my-enrollments'],
-        queryFn: getMyEnrollments,
+        queryFn: () => getMyEnrollments(),
         enabled: !!user, // Only fetch if user is logged in
     });
 
@@ -66,7 +66,7 @@ const BrowseCourses = () => {
 
     useEffect(() => {
         if (enrollmentsData) {
-            const enrolledIds = new Set(enrollmentsData.enrollments.map((e: any) => e.course_id));
+            const enrolledIds = new Set<string>(enrollmentsData.enrollments.map((e: Enrollment) => e.course_id));
             setEnrolledCourses(enrolledIds);
         }
     }, [enrollmentsData]);
