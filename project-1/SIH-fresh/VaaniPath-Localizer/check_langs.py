@@ -3,7 +3,7 @@ from deep_translator import GoogleTranslator
 try:
     # Get all supported languages
     langs = GoogleTranslator().get_supported_languages(as_dict=True)
-    
+    #hsh
     # Filter for Indian languages (manual list of common Indian languages/codes)
     indian_codes = [
         'hi', 'mr', 'ta', 'te', 'kn', 'ml', 'bn', 'gu', 'pa', 'ur', 'as', 'ne', 'sa', 'sd', 'or', # The 15 we know
