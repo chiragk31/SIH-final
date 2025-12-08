@@ -10,7 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Video, FileAudio, FileText, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Upload, Video, FileAudio, FileText, CheckCircle, ArrowLeft, User, Mic } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { uploadVideo } from '@/services/videos';
 import { getMyCourses, Course } from '@/services/courses';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -30,6 +31,7 @@ const TeacherUpload = () => {
   const [contentType, setContentType] = useState<'video' | 'audio' | 'document'>('video');
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<string>(courseIdParam || '');
+  const [tutorGender, setTutorGender] = useState<'male' | 'female'>('male');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -138,7 +140,10 @@ const TeacherUpload = () => {
           domain: formData.domain,
           source_language: formData.source_language,
           target_languages: formData.target_languages,
-          course_id: selectedCourseId
+          source_language: formData.source_language,
+          target_languages: formData.target_languages,
+          course_id: selectedCourseId,
+          tutor_gender: tutorGender
         },
         (progress) => {
           setUploadProgress(progress);
@@ -272,6 +277,37 @@ const TeacherUpload = () => {
                     <FileText className="h-6 w-6" />
                     <span className="text-sm font-medium">{t('teacherUpload.document')}</span>
                   </button>
+                </div>
+
+                {/* Tutor Gender Selection */}
+                <div className="space-y-3 mb-6">
+                    <Label>Tutor Voice Gender (for AI Dubbing) *</Label>
+                    <RadioGroup 
+                      value={tutorGender} 
+                      onValueChange={(v) => setTutorGender(v as 'male' | 'female')}
+                      className="grid grid-cols-2 gap-4"
+                    >
+                      <div>
+                        <RadioGroupItem value="male" id="male" className="peer sr-only" />
+                        <Label
+                          htmlFor="male"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:text-primary cursor-pointer"
+                        >
+                          <User className="mb-3 h-6 w-6" />
+                          Male Voice
+                        </Label>
+                      </div>
+                      <div>
+                        <RadioGroupItem value="female" id="female" className="peer sr-only" />
+                        <Label
+                          htmlFor="female"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:text-primary cursor-pointer"
+                        >
+                          <User className="mb-3 h-6 w-6" />
+                          Female Voice
+                        </Label>
+                      </div>
+                    </RadioGroup>
                 </div>
 
                 <div className="space-y-2">

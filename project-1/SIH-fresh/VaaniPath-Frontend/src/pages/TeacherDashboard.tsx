@@ -16,8 +16,10 @@ import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { useWalkthrough } from '@/hooks/useWalkthrough';
 
 const TeacherDashboard = () => {
+    const { startTeacherTour } = useWalkthrough();
   const { t } = useTranslation();
   const { isTeacher, user } = useAuth();
   const { toast } = useToast();
@@ -44,6 +46,14 @@ const TeacherDashboard = () => {
   useEffect(() => {
     if (!isTeacher) {
       navigate('/teacherlogin');
+    } else {
+        const hasSeenTour = localStorage.getItem('hasSeenTeacherTour');
+        if (!hasSeenTour) {
+            setTimeout(() => {
+                startTeacherTour();
+                localStorage.setItem('hasSeenTeacherTour', 'true');
+            }, 1500);
+        }
     }
   }, [isTeacher, navigate]);
 
@@ -120,7 +130,7 @@ const TeacherDashboard = () => {
           className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10"
         >
           {quickActions.map((action, index) => (
-            <Link key={index} to={action.link}>
+            <Link key={index} to={action.link} id={`quick-action-${index}`}>
               <Card className={`glass-card border-white/20 dark:border-white/10 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group ${action.bgColor} ${action.hoverColor}`}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-3">
@@ -142,6 +152,7 @@ const TeacherDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-10"
+          id="teacher-stats-overview"
         >
           <Card className="glass-card border-white/20 dark:border-white/10 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -208,7 +219,10 @@ const TeacherDashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
+          id="recent-courses"
         >
           <Card className="glass-card border-white/20 dark:border-white/10 shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between">

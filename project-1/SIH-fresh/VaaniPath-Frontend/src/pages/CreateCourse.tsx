@@ -16,9 +16,12 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { createCourse, uploadCourseThumbnail } from '@/services/courses';
-import { Upload, X, BookOpen, Languages, Tag } from 'lucide-react';
+import { Upload, X, BookOpen, Languages, Tag, Info, CheckCircle2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWalkthrough } from '@/hooks/useWalkthrough';
 
 import { INDIAN_LANGUAGES } from '@/constants/languages';
 
@@ -26,6 +29,7 @@ const CreateCourse = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
     const { isTeacher } = useAuth();
+    const { startCreateCourseTour } = useWalkthrough();
 
     const [formData, setFormData] = useState({
         title: '',
@@ -38,6 +42,7 @@ const CreateCourse = () => {
     const [thumbnail, setThumbnail] = useState<File | null>(null);
     const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
     const [isUploading, setIsUploading] = useState(false);
+    const [hasAgreed, setHasAgreed] = useState(false);
 
     const domains = [
         'agriculture',
@@ -75,9 +80,9 @@ const CreateCourse = () => {
     const handleLanguageToggle = (langCode: string) => {
         setFormData(prev => ({
             ...prev,
-            target_languages: prev.target_languages.includes(langCode)
+            target_languages: (prev.target_languages.includes(langCode as any)
                 ? prev.target_languages.filter(l => l !== langCode)
-                : [...prev.target_languages, langCode],
+                : [...prev.target_languages, langCode]) as any,
         }));
     };
 
@@ -166,6 +171,10 @@ const CreateCourse = () => {
                         <div className="p-3 rounded-2xl bg-primary/10 backdrop-blur-md border border-primary/20">
                             <BookOpen className="h-6 w-6 text-primary" />
                         </div>
+                        <Button variant="outline" size="sm" onClick={startCreateCourseTour} className="ml-auto">
+                            <Info className="mr-2 h-4 w-4" />
+                            Guide Me
+                        </Button>
                     </div>
                     <h1 className="text-4xl md:text-5xl font-bold mb-3 text-foreground font-heading tracking-tight">
                         Create New Course
@@ -191,8 +200,18 @@ const CreateCourse = () => {
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 {/* Title */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="title">Course Title *</Label>
+                                <div id="course-title-section" className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <Label htmlFor="title">Course Title *</Label>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Provide a clear, descriptive name for your course.</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
                                     <Input
                                         id="title"
                                         placeholder="e.g., Introduction to Organic Farming"
@@ -207,7 +226,17 @@ const CreateCourse = () => {
 
                                 {/* Description */}
                                 <div className="space-y-2">
-                                    <Label htmlFor="description">Description</Label>
+                                    <div className="flex items-center gap-2">
+                                        <Label htmlFor="description">Description</Label>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Summarize what students will learn. Keep it professional and engaging.</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
                                     <Textarea
                                         id="description"
                                         placeholder="Describe what students will learn in this course..."
@@ -221,7 +250,7 @@ const CreateCourse = () => {
                                 </div>
 
                                 {/* Subject */}
-                                <div className="space-y-2">
+                                <div id="course-domain-section" className="space-y-2">
                                     <Label htmlFor="domain">Subject *</Label>
                                     <Select
                                         value={formData.domain}
@@ -247,7 +276,7 @@ const CreateCourse = () => {
                                 </div>
 
                                 {/* Source Language */}
-                                <div className="space-y-2">
+                                <div id="course-language-section" className="space-y-2">
                                     <Label htmlFor="source_language">Course Language *</Label>
                                     <Select
                                         value={formData.source_language}
@@ -257,7 +286,7 @@ const CreateCourse = () => {
                                                 source_language: value,
                                                 target_languages: INDIAN_LANGUAGES
                                                     .filter(l => l.code !== value)
-                                                    .map(l => l.code)
+                                                    .map(l => l.code) as any
                                             })
                                         }
                                         required
@@ -297,7 +326,7 @@ const CreateCourse = () => {
                                                             : 'outline'
                                                     }
                                                     size="sm"
-                                                    onClick={() => handleLanguageToggle(lang.code)}
+                                                    onClick={() => handleLanguageToggle(lang.code as any)}
                                                     className="transition-all"
                                                 >
                                                     {lang.name}
@@ -307,7 +336,7 @@ const CreateCourse = () => {
                                 </div>
 
                                 {/* Thumbnail */}
-                                <div className="space-y-2">
+                                <div id="course-thumbnail-section" className="space-y-2">
                                     <Label>Course Thumbnail (Optional)</Label>
                                     <p className="text-sm text-muted-foreground mb-3">
                                         Upload a thumbnail or we'll use the first video's thumbnail
@@ -351,6 +380,39 @@ const CreateCourse = () => {
                                     )}
                                 </div>
 
+                                {/* Guidelines Agreement */}
+                                <div id="course-guidelines-section" className="bg-muted/30 p-4 rounded-xl border border-muted space-y-4">
+                                    <div className="flex items-start gap-3">
+                                        <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                                        <div className="space-y-3">
+                                            <h4 className="font-semibold text-sm">Instructor Guidelines</h4>
+                                            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                                                <li>Provide a clear course name and description.</li>
+                                                <li>Use respectful and professional language.</li>
+                                                <li>Avoid political, religious, or promotional content.</li>
+                                                <li>Review localized output for accuracy.</li>
+                                                <li>Use correct vocational terminology.</li>
+                                                <li>Ensure all content is safe and appropriate.</li>
+                                                <li>Confirm your course follows all platform rules.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2 pt-2 border-t border-muted/50">
+                                        <Checkbox 
+                                            id="guidelines" 
+                                            checked={hasAgreed}
+                                            onCheckedChange={(checked) => setHasAgreed(checked as boolean)}
+                                        />
+                                        <Label 
+                                            htmlFor="guidelines" 
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                        >
+                                            I agree to the Instructor Guidelines and Platform Rules
+                                        </Label>
+                                    </div>
+                                </div>
+
                                 {/* Submit */}
                                 <div className="flex gap-4 pt-6 border-t">
                                     <Button
@@ -361,7 +423,7 @@ const CreateCourse = () => {
                                     >
                                         Cancel
                                     </Button>
-                                    <Button type="submit" disabled={isUploading} className="flex-1">
+                                    <Button id="create-course-submit" type="submit" disabled={isUploading || !hasAgreed} className="flex-1">
                                         {isUploading ? 'Creating Course...' : 'Create Course'}
                                     </Button>
                                 </div>

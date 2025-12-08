@@ -8,6 +8,14 @@
  * Based on GIGW 3.0 (Indian Government Website Guidelines)
  */
 
+/* Driver.js Z-Index Fix */
+.driver-popover {
+  z-index: 10000 !important;
+}
+.driver-overlay {
+  z-index: 9999 !important;
+}
+
 @layer base {
   :root {
     /* Core Colors - Light Mode */
