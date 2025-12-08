@@ -25,7 +25,7 @@ const TeacherDashboard = () => {
 
   const { data: coursesData, isLoading: isCoursesLoading } = useQuery({
     queryKey: ['teacher-courses'],
-    queryFn: getMyCourses,
+    queryFn: () => getMyCourses(),
     enabled: !!isTeacher,
     staleTime: 1000 * 60 * 5,
   });
@@ -219,7 +219,23 @@ const TeacherDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {isLoading ? (
-                <div className="text-center py-8 text-muted-foreground">{t('browseCourses.loading')}</div>
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-4 rounded-xl border border-muted">
+                      <div className="flex items-start gap-4">
+                        <div className="w-24 h-16 rounded-lg bg-muted/50 animate-pulse flex-shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-5 bg-muted/50 rounded animate-pulse w-3/4" />
+                          <div className="h-4 bg-muted/50 rounded animate-pulse w-1/2" />
+                          <div className="flex gap-4 mt-2">
+                            <div className="h-4 bg-muted/50 rounded animate-pulse w-16" />
+                            <div className="h-4 bg-muted/50 rounded animate-pulse w-20" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : courses.length > 0 ? (
                 courses.slice(0, 3).map((course) => (
                   <div

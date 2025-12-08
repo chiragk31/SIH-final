@@ -63,9 +63,20 @@ const MyCourses = () => {
 
                 {/* Course Grid */}
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <BookOpen className="h-16 w-16 text-primary mb-4 animate-pulse" />
-                        <p className="text-muted-foreground">{t('myCourses.loading')}</p>
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <Card key={i} className="h-full flex flex-col overflow-hidden">
+                                <div className="aspect-video bg-muted/50 animate-pulse" />
+                                <CardHeader className="flex-grow space-y-3">
+                                    <div className="h-6 bg-muted/50 rounded animate-pulse" />
+                                    <div className="h-4 bg-muted/50 rounded w-3/4 animate-pulse" />
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <div className="h-2 bg-muted/50 rounded animate-pulse" />
+                                    <div className="h-10 bg-muted/50 rounded animate-pulse" />
+                                </CardContent>
+                            </Card>
+                        ))}
                     </div>
                 ) : enrollments.length > 0 ? (
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -74,7 +85,7 @@ const MyCourses = () => {
                                 key={enrollment.id}
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                                transition={{ duration: 0.3, delay: index * 0.05 }}
                                 whileHover={{ y: -8 }}
                                 className="h-full"
                             >
