@@ -6,7 +6,7 @@ import asyncio
 
 from gtts import gTTS
 from google.oauth2 import service_account
-from google.cloud import texttospeech
+from google.cloud import texttospeech_v1beta1 as texttospeech
 
 from .utils import setup_logger
 
@@ -129,12 +129,25 @@ def _get_google_client():
     return _GOOGLE_CLIENT
 
 
-def _tts_google(text: str, lang: str, output_path: str, gender: str = "NEUTRAL") -> str:
+def _tts_google(text: str, lang: str, output_path: str, gender: str = "NEUTRAL") -> tuple[str, list[tuple[float, float]]]:
     client = _get_google_client()
     if not client:
         raise RuntimeError("Google Cloud TTS client not available")
 
-    input_text = texttospeech.SynthesisInput(text=text)
+    # Check if we need to insert SSML marks for BEEP
+    is_ssml = False
+    input_text_param = None
+    beep_regions = []
+
+    if "BEEP" in text:
+        is_ssml = True
+        # Replace BEEP with SSML marks
+        # We wrap BEEP with marks to get start and end times
+        # Note: Google TTS might still speak "BEEP". We will rely on marks to silence it later.
+        ssml_text = "<speak>" + text.replace("&", "&amp;").replace("BEEP", '<mark name="beep_start"/>BEEP<mark name="beep_end"/>') + "</speak>"
+        input_text_param = texttospeech.SynthesisInput(ssml=ssml_text)
+    else:
+        input_text_param = texttospeech.SynthesisInput(text=text)
     
     # Map gender string to enum
     ssml_gender = texttospeech.SsmlVoiceGender.NEUTRAL
@@ -152,14 +165,42 @@ def _tts_google(text: str, lang: str, output_path: str, gender: str = "NEUTRAL")
         audio_encoding=texttospeech.AudioEncoding.MP3
     )
 
-    response = client.synthesize_speech(
-        input=input_text, voice=voice, audio_config=audio_config
-    )
+    # Enable timepoints if SSML
+    if is_ssml:
+        response = client.synthesize_speech(
+            request=texttospeech.SynthesizeSpeechRequest(
+                input=input_text_param,
+                voice=voice,
+                audio_config=audio_config,
+                enable_time_pointing=["SSML_MARK"]
+            )
+        )
+        
+        # Parse timepoints
+        start_times = []
+        end_times = []
+        
+        for tp in response.timepoints:
+            # mark_name is "beep_start" or "beep_end"
+            # time_seconds is float
+            if tp.mark_name == "beep_start":
+                start_times.append(tp.time_seconds)
+            elif tp.mark_name == "beep_end":
+                end_times.append(tp.time_seconds)
+                
+        # Zip them safely
+        for s, e in zip(start_times, end_times):
+            beep_regions.append((s, e))
+            
+    else:
+        response = client.synthesize_speech(
+            input=input_text_param, voice=voice, audio_config=audio_config
+        )
 
     with open(output_path, "wb") as out:
         out.write(response.audio_content)
         
-    return output_path
+    return output_path, beep_regions
 
 
 def _select_edge_voice(lang: str) -> str | None:
@@ -207,10 +248,10 @@ def tts_synthesize(text: str, lang: str, output_path: str, gender: str = 'male')
         from .tts_google import tts_google
         # logger.info(f"🎙️ Attempting Google Cloud TTS for {lang} ({gender} voice)...")
         # Temporarily silenced verbose log to cleanup output, will log only on success/fail
-        success = tts_google(text_for_tts, lang, output_path, gender=gender)
-        if success:
+        path, regions = tts_google(text_for_tts, lang, output_path, gender=gender)
+        if path:
             logger.info(f"✅ Saved TTS (Google Cloud {gender}) to {output_path}")
-            return output_path, []
+            return path, regions
         else:
             logger.warning("⚠️ Google Cloud TTS failed, falling back to edge-tts")
     except Exception as e:
@@ -260,9 +301,9 @@ def tts_synthesize(text: str, lang: str, output_path: str, gender: str = 'male')
         try:
              # Default to Neutral if not specified, or infer from somewhere if needed. 
              # For now, default.
-             _tts_google(text_for_tts, lang, output_path)
-             logger.info(f"Saved TTS (Google Cloud) to {output_path}")
-             return output_path, []
+             path, _ = _tts_google(text_for_tts, lang, output_path)
+             logger.info(f"Saved TTS (Google Cloud) to {path}")
+             return path, []
         except Exception as e:
              logger.error(f"Google Cloud TTS failed: {e}; falling back to gTTS")
 

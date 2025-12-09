@@ -48,7 +48,8 @@ def setup_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)
     if not logger.handlers:
         logger.setLevel(logging.INFO)
-        ch = logging.StreamHandler()
+        import sys
+        ch = logging.StreamHandler(sys.stdout)
         ch.setLevel(logging.INFO)
         formatter = logging.Formatter(
             fmt="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
@@ -56,6 +57,7 @@ def setup_logger(name: str) -> logging.Logger:
         )
         ch.setFormatter(formatter)
         logger.addHandler(ch)
+        logger.propagate = False # Prevent double logging if root logger also handles it
     return logger
 
 

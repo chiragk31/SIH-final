@@ -43,6 +43,7 @@ def process_chunk(
     voice_gender: str = 'male',
 ) -> Dict[str, Any]:
     audio_path = chunk_meta["audio_path"]
+    logger.info(f"Chunk {chunk_meta['index']}: Started processing (STT -> Translation -> TTS)")
 
     # 1) STT
     text_original, segments = transcribe(
@@ -89,6 +90,8 @@ def process_chunk(
 
     # Keep only raw TTS generation, remove time stretching
     final_audio_path = audio_out
+    
+    logger.info(f"Chunk {chunk_meta['index']}: Cpmpleted processing.")
 
     return {
         "index": chunk_meta["index"],
