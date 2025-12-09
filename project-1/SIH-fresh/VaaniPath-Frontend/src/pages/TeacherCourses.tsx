@@ -61,8 +61,8 @@ const TeacherCourses = () => {
     } catch (error) {
       console.error('Failed to load courses:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load your courses',
+        title: t('teacherCourses.errorTitle'),
+        description: t('teacherCourses.loadError'),
         variant: 'destructive'
       });
     } finally {
@@ -74,15 +74,15 @@ const TeacherCourses = () => {
     try {
       await deleteCourse(courseId);
       toast({
-        title: 'Course Deleted',
-        description: `"${courseTitle}" has been removed successfully`,
+        title: t('teacherCourses.deleteSuccessTitle'),
+        description: `"${courseTitle}" ${t('teacherCourses.deleteSuccessDesc')}`,
       });
       loadCourses();
     } catch (error: any) {
       console.error('Delete error:', error);
       toast({
-        title: 'Delete Failed',
-        description: error.response?.data?.detail || 'Failed to delete course',
+        title: t('teacherCourses.deleteFailTitle'),
+        description: error.response?.data?.detail || t('teacherCourses.deleteFailDesc'),
         variant: 'destructive'
       });
     }
@@ -99,7 +99,7 @@ const TeacherCourses = () => {
   });
 
   const formatDuration = (seconds?: number) => {
-    if (!seconds) return 'No content';
+    if (!seconds) return t('teacherCourses.noContent');
     const mins = Math.floor(seconds / 60);
     if (mins < 60) return `${mins}m`;
     const hrs = Math.floor(mins / 60);
@@ -271,7 +271,7 @@ const TeacherCourses = () => {
                       {course.title}
                     </CardTitle>
                     <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
-                      {course.description || 'No description provided'}
+                      {course.description || t('teacherCourses.noDescription')}
                     </p>
                   </CardHeader>
 

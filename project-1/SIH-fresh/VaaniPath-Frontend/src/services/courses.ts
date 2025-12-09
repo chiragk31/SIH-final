@@ -82,8 +82,9 @@ export const getMyCourses = async (params?: {
 };
 
 // Get course by ID
-export const getCourseById = async (id: string): Promise<CourseWithVideos> => {
+export const getCourseById = async (id: string, language?: string): Promise<CourseWithVideos> => {
     const response = await axios.get(`${API_URL}/courses/${id}`, {
+        params: { language }, // 🚀 Pass language param
         headers: getAuthHeaders(),
     });
     return response.data;

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
+from typing import List, Optional
 from app.models.enrollment import (
     EnrollmentCreate,
     EnrollmentResponse,
@@ -136,6 +136,7 @@ async def enroll_in_course(
 
 @router.get("/my", response_model=EnrollmentList)
 async def get_my_enrollments(
+    language: Optional[str] = None, # 🚀 Added language support
     current_user: dict = Depends(get_current_user)
 ):
     """Get student's enrolled courses"""

@@ -143,18 +143,18 @@ export const Profile = () => {
                                 <div className="grid md:grid-cols-2 gap-6">
                                     {/* Fields */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="full_name">{t('auth.fullName')}</Label>
+                                        <Label htmlFor="full_name">{t('profile.name')}</Label>
                                         <Input
                                             id="full_name"
                                             name="full_name"
                                             value={formData.full_name}
                                             onChange={handleInputChange}
-                                            placeholder="Enter your name"
+                                            placeholder={t('profile.name')}
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="email">{t('auth.emailAddress')}</Label>
+                                        <Label htmlFor="email">{t('profile.email')}</Label>
                                         <Input id="email" value={user?.email || ''} disabled className="bg-muted" />
                                     </div>
 

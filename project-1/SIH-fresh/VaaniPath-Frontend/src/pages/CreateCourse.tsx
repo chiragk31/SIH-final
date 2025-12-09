@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next'; // Added import
 import { Header } from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ import { useWalkthrough } from '@/hooks/useWalkthrough';
 import { INDIAN_LANGUAGES } from '@/constants/languages';
 
 const CreateCourse = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { toast } = useToast();
     const { isTeacher } = useAuth();
@@ -91,8 +93,8 @@ const CreateCourse = () => {
 
         if (!formData.title.trim()) {
             toast({
-                title: 'Title required',
-                description: 'Please enter a course title',
+                title: t('common.titleRequired'),
+                description: t('common.enterTitle'),
                 variant: 'destructive',
             });
             return;
@@ -100,8 +102,8 @@ const CreateCourse = () => {
 
         if (!formData.domain) {
             toast({
-                title: 'Subject required',
-                description: 'Please select a subject',
+                title: t('common.subjectRequired'),
+                description: t('common.selectSubject'),
                 variant: 'destructive',
             });
             return;
@@ -109,8 +111,8 @@ const CreateCourse = () => {
 
         if (formData.target_languages.length === 0) {
             toast({
-                title: 'Languages required',
-                description: 'Please select at least one target language',
+                title: t('common.languagesRequired'),
+                description: t('common.selectOneLanguage'),
                 variant: 'destructive',
             });
             return;
@@ -132,16 +134,16 @@ const CreateCourse = () => {
             const newCourse = await createCourse(courseData);
 
             toast({
-                title: 'Course created!',
-                description: `"${newCourse.title}" has been created successfully`,
+                title: t('common.created'),
+                description: t('common.createdSuccess', { title: newCourse.title }),
             });
 
             navigate(`/teacher/course/${newCourse.id}`);
         } catch (error: any) {
             console.error('Error creating course:', error);
             toast({
-                title: 'Failed to create course',
-                description: error.response?.data?.detail || 'An error occurred',
+                title: t('common.failed'),
+                description: error.response?.data?.detail || t('common.error'),
                 variant: 'destructive',
             });
         } finally {
@@ -173,14 +175,14 @@ const CreateCourse = () => {
                         </div>
                         <Button variant="outline" size="sm" onClick={startCreateCourseTour} className="ml-auto">
                             <Info className="mr-2 h-4 w-4" />
-                            Guide Me
+                            {t('common.guideMe')}
                         </Button>
                     </div>
                     <h1 className="text-4xl md:text-5xl font-bold mb-3 text-foreground font-heading tracking-tight">
-                        Create New Course
+                        {t('common.createCourseTitle')}
                     </h1>
                     <p className="text-lg text-muted-foreground">
-                        Set up your course details and start adding content
+                        {t('common.createCourseSubtitle')}
                     </p>
                 </motion.div>
 
@@ -192,9 +194,9 @@ const CreateCourse = () => {
                 >
                     <Card className="glass-card border-white/20 dark:border-white/10 shadow-xl">
                         <CardHeader>
-                            <CardTitle>Course Information</CardTitle>
+                            <CardTitle>{t('common.courseInfo')}</CardTitle>
                             <CardDescription>
-                                Fill in the basic details about your course
+                                {t('common.courseInfoDesc')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -202,7 +204,7 @@ const CreateCourse = () => {
                                 {/* Title */}
                                 <div id="course-title-section" className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <Label htmlFor="title">Course Title *</Label>
+                                        <Label htmlFor="title">{t('common.titleLabel')}</Label>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
                                                 <Info className="h-4 w-4 text-muted-foreground cursor-help" />
@@ -214,7 +216,7 @@ const CreateCourse = () => {
                                     </div>
                                     <Input
                                         id="title"
-                                        placeholder="e.g., Introduction to Organic Farming"
+                                        placeholder={t('common.titlePlaceholder')}
                                         value={formData.title}
                                         onChange={(e) =>
                                             setFormData({ ...formData, title: e.target.value })
@@ -227,7 +229,7 @@ const CreateCourse = () => {
                                 {/* Description */}
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <Label htmlFor="description">Description</Label>
+                                        <Label htmlFor="description">{t('common.description')}</Label>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
                                                 <Info className="h-4 w-4 text-muted-foreground cursor-help" />
@@ -239,7 +241,7 @@ const CreateCourse = () => {
                                     </div>
                                     <Textarea
                                         id="description"
-                                        placeholder="Describe what students will learn in this course..."
+                                        placeholder={t('common.descriptionPlaceholder')}
                                         value={formData.description}
                                         onChange={(e) =>
                                             setFormData({ ...formData, description: e.target.value })
@@ -251,7 +253,7 @@ const CreateCourse = () => {
 
                                 {/* Subject */}
                                 <div id="course-domain-section" className="space-y-2">
-                                    <Label htmlFor="domain">Subject *</Label>
+                                    <Label htmlFor="domain">{t('common.subject')}</Label>
                                     <Select
                                         value={formData.domain}
                                         onValueChange={(value) =>
@@ -262,7 +264,7 @@ const CreateCourse = () => {
                                         <SelectTrigger className="bg-background/50">
                                             <div className="flex items-center gap-2">
                                                 <Tag className="h-4 w-4 text-primary" />
-                                                <SelectValue placeholder="Select subject" />
+                                                <SelectValue placeholder={t('common.selectSubjectPlaceholder')} />
                                             </div>
                                         </SelectTrigger>
                                         <SelectContent>
@@ -277,7 +279,7 @@ const CreateCourse = () => {
 
                                 {/* Source Language */}
                                 <div id="course-language-section" className="space-y-2">
-                                    <Label htmlFor="source_language">Course Language *</Label>
+                                    <Label htmlFor="source_language">{t('common.sourceLanguage')}</Label>
                                     <Select
                                         value={formData.source_language}
                                         onValueChange={(value) =>
@@ -309,9 +311,9 @@ const CreateCourse = () => {
 
                                 {/* Target Languages */}
                                 <div className="space-y-2">
-                                    <Label>Translation Languages *</Label>
+                                    <Label>{t('common.translationLanguages')}</Label>
                                     <p className="text-sm text-muted-foreground mb-3">
-                                        Select languages for course translation
+                                        {t('common.translationDesc')}
                                     </p>
                                     <div className="flex flex-wrap gap-2">
                                         {languages
@@ -337,9 +339,9 @@ const CreateCourse = () => {
 
                                 {/* Thumbnail */}
                                 <div id="course-thumbnail-section" className="space-y-2">
-                                    <Label>Course Thumbnail (Optional)</Label>
+                                    <Label>{t('common.thumbnailUpload')}</Label>
                                     <p className="text-sm text-muted-foreground mb-3">
-                                        Upload a thumbnail or we'll use the first video's thumbnail
+                                        {t('common.thumbnailDesc')}
                                     </p>
 
                                     {thumbnailPreview ? (
@@ -372,9 +374,9 @@ const CreateCourse = () => {
                                             />
                                             <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                                             <p className="text-sm text-muted-foreground">
-                                                Click to upload thumbnail
+                                                {t('common.clickUpload')}
                                                 <br />
-                                                (Max 5MB, JPG/PNG)
+                                                {t('common.maxSize')}
                                             </p>
                                         </label>
                                     )}
@@ -385,15 +387,11 @@ const CreateCourse = () => {
                                     <div className="flex items-start gap-3">
                                         <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                                         <div className="space-y-3">
-                                            <h4 className="font-semibold text-sm">Instructor Guidelines</h4>
+                                            <h4 className="font-semibold text-sm">{t('common.guidelines')}</h4>
                                             <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                                                <li>Provide a clear course name and description.</li>
-                                                <li>Use respectful and professional language.</li>
-                                                <li>Avoid political, religious, or promotional content.</li>
-                                                <li>Review localized output for accuracy.</li>
-                                                <li>Use correct vocational terminology.</li>
-                                                <li>Ensure all content is safe and appropriate.</li>
-                                                <li>Confirm your course follows all platform rules.</li>
+                                                {(t('common.guidelinesList', { returnObjects: true }) as string[]).map((item, i) => (
+                                                    <li key={i}>{item}</li>
+                                                ))}
                                             </ul>
                                         </div>
                                     </div>
@@ -408,7 +406,7 @@ const CreateCourse = () => {
                                             htmlFor="guidelines" 
                                             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                                         >
-                                            I agree to the Instructor Guidelines and Platform Rules
+                                            {t('common.agreeGuidelines')}
                                         </Label>
                                     </div>
                                 </div>
@@ -421,10 +419,10 @@ const CreateCourse = () => {
                                         onClick={() => navigate('/teacher/courses')}
                                         disabled={isUploading}
                                     >
-                                        Cancel
+                                        {t('common.cancel')}
                                     </Button>
                                     <Button id="create-course-submit" type="submit" disabled={isUploading || !hasAgreed} className="flex-1">
-                                        {isUploading ? 'Creating Course...' : 'Create Course'}
+                                        {isUploading ? t('common.creating') : t('common.createCourse')}
                                     </Button>
                                 </div>
                             </form>

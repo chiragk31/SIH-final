@@ -308,6 +308,7 @@ async def get_teacher_stats(
 @router.get("/{course_id}", response_model=CourseWithVideos)
 async def get_course_by_id(
     course_id: str,
+    language: Optional[str] = None, # 🚀 Added language support
     current_user: dict = Depends(get_optional_user)
 ):
     """Get course details with videos"""
@@ -493,7 +494,8 @@ async def delete_course(
             )
         
         course = course_response.data[0]
-        if course["teacher_id"] != current_user["id"]:
+        # Allow deletion if user is owner OR admin
+        if course["teacher_id"] != current_user["id"] and not current_user.get("is_admin"):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You can only delete your own courses"

@@ -12,14 +12,25 @@ import { Globe } from 'lucide-react';
 
 interface LanguageSwitcherProps {
     variant?: 'dropdown' | 'list';
+    value?: string;
+    onSelect?: (lang: string) => void;
 }
 
-export const LanguageSwitcher = ({ variant = 'dropdown' }: LanguageSwitcherProps) => {
+export const LanguageSwitcher = ({ variant = 'dropdown', value, onSelect }: LanguageSwitcherProps) => {
     const { i18n } = useTranslation();
     const { setUserLanguage } = useUserLanguage();
 
+    // Use provided value or fallback to current i18n language
+    const currentLang = value || i18n.language;
+
     const changeLanguage = async (langCode: string) => {
-        await setUserLanguage(langCode);
+        if (onSelect) {
+            // Controlled mode: just call parent handler
+            onSelect(langCode);
+        } else {
+            // Uncontrolled mode: apply immediately
+            await setUserLanguage(langCode);
+        }
     };
 
     if (variant === 'list') {
@@ -29,7 +40,7 @@ export const LanguageSwitcher = ({ variant = 'dropdown' }: LanguageSwitcherProps
                     <button
                         key={lang.code}
                         onClick={() => changeLanguage(lang.code)}
-                        className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${i18n.language === lang.code
+                        className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${currentLang === lang.code
                             ? 'border-primary bg-primary/5'
                             : 'border-border hover:border-primary/50'
                             }`}
@@ -43,7 +54,7 @@ export const LanguageSwitcher = ({ variant = 'dropdown' }: LanguageSwitcherProps
     }
 
     return (
-        <Select value={i18n.language} onValueChange={changeLanguage}>
+        <Select value={currentLang} onValueChange={changeLanguage}>
             <SelectTrigger className="w-[140px] md:w-[180px]">
                 <Globe className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Select Language" />

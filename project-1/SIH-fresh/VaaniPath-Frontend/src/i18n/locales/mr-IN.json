@@ -326,6 +326,35 @@
     "profileUpdated": "प्रोफाइल अपडेट केली",
     "profileSaved": "तुमचे प्रोफाइल तपशील यशस्वीरित्या जतन केले आहेत.",
     "updateFailed": "अपडेट अयशस्वी",
-    "failedMessage": "प्रोफाइल अपडेट करण्यात अयशस्वी. कृपया पुन्हा प्रयत्न करा."
+    "failedMessage": "प्रोफाइल अपडेट करण्यात अयशस्वी. कृपया पुन्हा प्रयत्न करा.",
+    "role": "भूमिका",
+    "email": "ईमेल पत्ता",
+    "name": "पूर्ण नाव",
+    "teacher": "शिक्षक",
+    "student": "विद्यार्थी"
+  },
+  "coursePlayer": {
+    "backToCourses": "माय कोर्सेस कडे परत जा",
+    "videoLanguage": "व्हिडिओ भाषा",
+    "selectLanguage": "भाषा निवडा",
+    "processing": "डबिंगवर प्रक्रिया करत आहे...",
+    "noVideo": "कोणताही व्हिडिओ निवडलेला नाही",
+    "noDescription": "कोणतेही वर्णन उपलब्ध नाही",
+    "completed": "पूर्ण झाले",
+    "courseContent": "अभ्यासक्रम सामग्री",
+    "courseProgress": "अभ्यासक्रमाची प्रगती",
+    "mins": "मि",
+    "cachedContent": "कॅश्ड सामग्री",
+    "cachedContentDesc": "पूर्वी डब केलेली आवृत्ती प्ले करत आहे",
+    "dubbingStarted": "डबिंग सुरू झाले",
+    "dubbingStartedDesc": "{{language}} आवृत्ती तयार करत आहे...",
+    "dubbingComplete": "डबिंग पूर्ण!",
+    "dubbingCompleteDesc": "आता निवडलेल्या भाषेत खेळत आहे",
+    "dubbingFailed": "डबिंग अयशस्वी",
+    "dubbingFailedDesc": "मूळ आवृत्ती प्ले करत आहे",
+    "videoCompleted": "व्हिडिओ पूर्ण झाला!",
+    "videoCompletedDesc": "तुमची प्रगती जतन केली गेली आहे",
+    "errorTitle": "त्रुटी",
+    "loadError": "अभ्यासक्रम लोड करण्यात अयशस्वी"
   }
 }

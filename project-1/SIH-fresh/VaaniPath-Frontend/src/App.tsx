@@ -35,6 +35,7 @@ import TeacherQuizzes from "./pages/TeacherQuizzes";
 import TeacherDoubts from "./pages/TeacherDoubts";
 import TeacherAnalytics from "./pages/TeacherAnalytics";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminCourses from "./pages/AdminCourses"; // Added import
 import TutorsList from "./pages/TutorsList";
 import StudentsList from "./pages/StudentsList";
 import BrowseCourses from "./pages/BrowseCourses";
@@ -82,6 +83,7 @@ const AppContent = () => {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/tutors" element={<TutorsList />} />
           <Route path="/admin/students" element={<StudentsList />} />
+          <Route path="/admin/courses" element={<AdminCourses />} />
 
           {/* Student Routes */}
           <Route path="/homepage" element={<StudentDashboard />} />
@@ -102,30 +104,7 @@ const AppContent = () => {
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile-data" element={<ProfileData />} />
-          {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/tutors" element={<TutorsList />} />
-          <Route path="/admin/students" element={<StudentsList />} />
 
-          {/* Student Routes */}
-          <Route path="/homepage" element={<StudentDashboard />} />
-          <Route path="/enrolled" element={<MyCourses />} />
-          <Route path="/doubts" element={<StudentDoubts />} />
-          <Route path="/course/:courseId" element={<CourseDetails />} />
-          <Route path="/content/:videoId" element={<CourseDetail />} />
-          <Route path="/quiz/:courseId" element={<StudentQuizzes />} />
-          <Route path="/certificate/:courseId" element={<StudentCertificate />} />
-          <Route path="/rewards" element={<StudentRewards />} />
-          <Route path="/community" element={<ChatCommunity />} />
-          <Route path="/roadmap" element={<AIRoadmap />} />
-          <Route path="/feedback" element={<StudentFeedback />} />
-          <Route path="/podcast" element={<PodcastPage />} />
-          <Route path="/browse-courses" element={<BrowseCourses />} />
-          <Route path="/my-courses" element={<MyCourses />} />
-          <Route path="/course-player/:courseId" element={<CoursePlayer />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile-data" element={<ProfileData />} />
 
           {/* Teacher Routes */}
           <Route path="/teacher/dashboard" element={<TeacherDashboard />} />

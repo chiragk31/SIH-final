@@ -51,11 +51,9 @@
     "error": "ତ୍ରୁଟି",
     "success": "ସଫଳ"
   },
-
   "header": {
     "title": "VAANIପଥ"
   },
-
   "landing": {
     "heroTitle": "ଆପଣଙ୍କ ଭାଷାରେ ଶିଖନ୍ତୁ",
     "heroSubtitle": "AI ଚାଲିତ ଅନେକଭାଷୀ ଶିକ୍ଷା ପ୍ଲାଟଫର୍ମ",
@@ -90,7 +88,6 @@
     "joinStudents": "VaaniPath ସହିତ ନିଜ ଭବିଷ୍ୟତ ପରିବର୍ତ୍ତନ କରୁଥିବା ହଜାର ଛାତ୍ରଙ୍କ ସହିତ ଯୋଗଦିଅନ୍ତୁ।",
     "createAccount": "ଖାତା ସୃଷ୍ଟି କରନ୍ତୁ"
   },
-
   "auth": {
     "email": "ଇମେଲ୍",
     "password": "ପାସୱାର୍ଡ",
@@ -126,12 +123,10 @@
     "preferredLanguage": "ପସନ୍ଦର ଭାଷା",
     "selectPreferredLanguage": "ପସନ୍ଦର ଭାଷା ବାଛନ୍ତୁ"
   },
-
   "dashboard": {
     "welcomeMessage": "ପୁନଃ ସ୍ୱାଗତ",
     "completionPercentage": "ସମାପ୍ତି ଶତ ପ୍ରତିଶତ"
   },
-
   "myCourses": {
     "title": "ମୋର କୋର୍ସ",
     "subtitle": "ଆପଣଙ୍କ ଶିକ୍ଷା ଯାତ୍ରାକୁ ଜାରି ରଖନ୍ତୁ",
@@ -145,7 +140,6 @@
     "enrollPrompt": "ଶିକ୍ଷା ଆରମ୍ଭ ପାଇଁ କୋର୍ସରେ ଭର୍ତ୍ତି ହୋନ୍ତୁ",
     "browse": "କୋର୍ସ ବ୍ରାଉଜ୍ କରନ୍ତୁ"
   },
-
   "footer": {
     "description": "AI ଚାଲିତ ବହୁଭାଷୀ କନ୍ଟେଣ୍ଟ ଇଞ୍ଜିନ୍ ଆପଣଙ୍କ ଭାଷାରେ ଶିକ୍ଷାକୁ ସହଜ କରେ।",
     "quickLinks": "ଦ୍ରୁତ ଲିଙ୍କ",
@@ -157,7 +151,6 @@
     "feedback": "ମତାମତ",
     "allRightsReserved": "ସମସ୍ତ ଅଧିକାର ସଂରକ୍ଷିତ।"
   },
-
   "browseCourses": {
     "title": "କୋର୍ସ ଖୋଜନ୍ତୁ",
     "subtitle": "ଶିଖିବା ପାଇଁ କୋର୍ସ ବ୍ରାଉଜ୍ କରନ୍ତୁ ଓ ଭର୍ତ୍ତି ହୋନ୍ତୁ",
@@ -173,7 +166,6 @@
     "noCourses": "କୌଣସି କୋର୍ସ ମିଳିଲା ନାହିଁ",
     "adjustFilters": "ଫିଲ୍ଟର ବଦଳାଇ ପୁନଃଚେଷ୍ଟା କରନ୍ତୁ"
   },
-
   "teacherDashboard": {
     "welcomeTeacher": "ସ୍ୱାଗତ",
     "subtitle": "ଆପଣଙ୍କ କୋର୍ସ ପରିଚାଳନା କରନ୍ତୁ ଓ ଛାତ୍ରମାନଙ୍କୁ ପ୍ରେରିତ କରନ୍ତୁ",
@@ -196,7 +188,6 @@
     "noCourses": "କୌଣସି କୋର୍ସ ନାହିଁ",
     "createFirst": "ଆପଣଙ୍କ ପ୍ରଥମ କୋର୍ସ ତିଆରି କରନ୍ତୁ"
   },
-
   "teacherCourses": {
     "title": "ମୋର କୋର୍ସ",
     "subtitle": "କୋର୍ସ ପରିଚାଳନା କରନ୍ତୁ ଓ ଛାତ୍ର ନିଶ୍ଚିତତା ଟ୍ରାକ୍ କରନ୍ତୁ",
@@ -217,7 +208,6 @@
     "cancel": "ବାତିଲ୍",
     "loading": "କୋର୍ସ ଲୋଡ୍ ହେଉଛି..."
   },
-
   "teacherUpload": {
     "title": "କନ୍ଟେଣ୍ଟ ଅପଲୋଡ୍ କରନ୍ତୁ",
     "subtitle": "ଆପଣଙ୍କ କୋର୍ସ ପାଇଁ ଏକ ନୂଆ ଭିଡିଓ ଯୋଡନ୍ତୁ",
@@ -245,7 +235,6 @@
     "fileTooLarge": "ଫାଇଲ୍ ବହୁତ ବଡ଼",
     "maxSize": "ସର୍ବାଧିକ ଆକାର 500MB"
   },
-
   "teacherQuizzes": {
     "title": "କୁଇଜ୍ ତିଆରି କରନ୍ତୁ",
     "subtitle": "ଛାତ୍ରମାନଙ୍କ ବୁଝା ପରୀକ୍ଷା ପାଇଁ କୁଇଜ୍ ବନାନ୍ତୁ",
@@ -266,7 +255,6 @@
     "validationError": "ଦୟାକରି ସମସ୍ତ ପ୍ରଶ୍ନ ଓ ବିକଳ୍ପ ଭରନ୍ତୁ",
     "success": "କୁଇଜ୍ ସଫଳତାର ସହିତ ସୃଷ୍ଟି ହେଲା!"
   },
-
   "teacherDoubts": {
     "title": "ଛାତ୍ରମାନଙ୍କ ପ୍ରଶ୍ନ",
     "subtitle": "ଛାତ୍ରମାନଙ୍କ ପ୍ରଶ୍ନର ଉତ୍ତର ଦେଇ ଶିଖିବାରେ ସହଯୋଗ କରନ୍ତୁ",
@@ -287,5 +275,49 @@
     "submitting": "ଜମା ହେଉଛି...",
     "typeAnswer": "ନିଜ ଉତ୍ତର ଏଠାରେ ଲେଖନ୍ତୁ...",
     "selectDoubt": "ବିବରଣୀ ଦେଖିବା ଓ ଉତ୍ତର ଦିଆ ପାଇଁ ପ୍ରଶ୍ନ ବାଛନ୍ତୁ"
+  },
+  "coursePlayer": {
+    "backToCourses": "ମୋ ପାଠ୍ୟକ୍ରମକୁ ଫେରନ୍ତୁ |",
+    "videoLanguage": "ଭିଡିଓ ଭାଷା",
+    "selectLanguage": "ଭାଷା ଚୟନ କରନ୍ତୁ |",
+    "processing": "ଡବିଂ ପ୍ରକ୍ରିୟାକରଣ ...",
+    "noVideo": "କ video ଣସି ଭିଡିଓ ଚୟନ ହୋଇନାହିଁ |",
+    "noDescription": "କ description ଣସି ବର୍ଣ୍ଣନା ଉପଲବ୍ଧ ନାହିଁ |",
+    "completed": "ସମାପ୍ତ",
+    "courseContent": "ପାଠ୍ୟକ୍ରମର ବିଷୟବସ୍ତୁ |",
+    "courseProgress": "ପାଠ୍ୟକ୍ରମର ଅଗ୍ରଗତି |",
+    "mins": "ମିନିଟ୍",
+    "cachedContent": "କ୍ୟାଚ୍ ହୋଇଥିବା ବିଷୟବସ୍ତୁ |",
+    "cachedContentDesc": "ପୂର୍ବରୁ ନାମିତ ସଂସ୍କରଣ ଖେଳିବା |",
+    "dubbingStarted": "ଡବିଂ ଆରମ୍ଭ ହେଲା |",
+    "dubbingStartedDesc": "{{ଭାଷା}} ସଂସ୍କରଣ ପ୍ରସ୍ତୁତ କରୁଛି ...",
+    "dubbingComplete": "ଡବିଂ ସଂପୂର୍ଣ୍ଣ!",
+    "dubbingCompleteDesc": "ବର୍ତ୍ତମାନ ମନୋନୀତ ଭାଷାରେ ଖେଳୁଛି |",
+    "dubbingFailed": "ଡବିଂ ବିଫଳ ହେଲା |",
+    "dubbingFailedDesc": "ମୂଳ ସଂସ୍କରଣ ଖେଳିବା |",
+    "videoCompleted": "ଭିଡିଓ ସମାପ୍ତ!",
+    "videoCompletedDesc": "ତୁମର ଅଗ୍ରଗତି ସଞ୍ଚୟ ହୋଇଛି |",
+    "errorTitle": "ତ୍ରୁଟି |",
+    "loadError": "ପାଠ୍ୟକ୍ରମ ଲୋଡ୍ କରିବାରେ ବିଫଳ |"
+  },
+  "profile": {
+    "title": "ମୋର ପ୍ରୋଫାଇଲ୍",
+    "personalInfo": "ବ୍ୟକ୍ତିଗତ ସୂଚନା",
+    "subtitle": "ଆପଣଙ୍କର ପ୍ରୋଫାଇଲ୍ ବିବରଣୀ ଦେଖନ୍ତୁ ଏବଂ ଅଦ୍ୟତନ କରନ୍ତୁ |",
+    "uploadPhoto": "ନୂତନ ଫଟୋ ଅପଲୋଡ୍ କରିବାକୁ କ୍ଲିକ୍ କରନ୍ତୁ |",
+    "contactNumber": "ଯୋଗାଯୋଗ ନମ୍ବର |",
+    "qualification": "ଯୋଗ୍ୟତା",
+    "specialization": "ବିଶେଷତା",
+    "domainExpertise": "ଡୋମେନ୍ ବିଶେଷଜ୍ଞତା |",
+    "saveChanges": "ପରିବର୍ତ୍ତନଗୁଡିକ ସଞ୍ଚୟ କରନ୍ତୁ |",
+    "profileUpdated": "ପ୍ରୋଫାଇଲ୍ ଅଦ୍ୟତନ ହୋଇଛି |",
+    "profileSaved": "ଆପଣଙ୍କର ପ୍ରୋଫାଇଲ୍ ବିବରଣୀ ସଫଳତାର ସହିତ ସଞ୍ଚୟ ହୋଇଛି |",
+    "updateFailed": "ଅଦ୍ୟତନ ବିଫଳ ହେଲା |",
+    "failedMessage": "ପ୍ରୋଫାଇଲ୍ ଅପଡେଟ୍ କରିବାରେ ବିଫଳ | ଦୟାକରି ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ |",
+    "role": "ଭୂମିକା",
+    "email": "ଇମେଲ୍ ଠିକଣା",
+    "name": "ପୂର୍ଣ୍ଣ ନାମ",
+    "teacher": "ଶିକ୍ଷକ",
+    "student": "ଛାତ୍ର"
   }
 }

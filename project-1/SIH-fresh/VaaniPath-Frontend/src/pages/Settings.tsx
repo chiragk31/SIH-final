@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Added useEffect
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
+import { useUserLanguage } from '@/hooks/useUserLanguage'; // Added import
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 
 export const Settings = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation(); // Destructured i18n
     const { user } = useAuth();
     const { toast } = useToast();
     const [isUploading, setIsUploading] = useState(false);
@@ -51,6 +52,37 @@ export const Settings = () => {
     const avatarUrl = user?.avatar_url
         ? (user.avatar_url.startsWith('http') ? user.avatar_url : `http://localhost:8000${user.avatar_url}`)
         : null;
+
+    const [selectedLanguage, setSelectedLanguage] = useState(i18n.language);
+    const { setUserLanguage } = useUserLanguage(); // Get hook
+
+    // Sync local state when global language changes (e.g. initial load)
+    useEffect(() => {
+        setSelectedLanguage(i18n.language);
+    }, [i18n.language]);
+
+    const handleLanguageSave = async () => {
+        setIsUploading(true); // Reuse loading state or create new one
+        try {
+            await setUserLanguage(selectedLanguage);
+            toast({
+                title: "Language Updated",
+                description: "Your preferred language has been saved.",
+            });
+             // Reload to reflect changes globally if needed, or just let i18n handle it
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        } catch (error) {
+             toast({
+                title: "Update Failed",
+                description: "Failed to save language preference.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
@@ -98,9 +130,21 @@ export const Settings = () => {
                             <CardDescription>{t('common.selectLanguage')}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex flex-col space-y-2">
-                                <Label>{t('common.language')}</Label>
-                                <LanguageSwitcher variant="list" />
+                            <div className="flex flex-col space-y-4">
+                                <div className="space-y-2">
+                                    <Label>{t('common.language')}</Label>
+                                    <LanguageSwitcher 
+                                        variant="list" 
+                                        value={selectedLanguage}
+                                        onSelect={setSelectedLanguage}
+                                    />
+                                </div>
+                                <div className="flex justify-end pt-2">
+                                    <Button onClick={handleLanguageSave} disabled={isUploading || selectedLanguage === i18n.language}>
+                                        {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Save Changes
+                                    </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -635,3 +635,95 @@ async def dub_text_endpoint(req: DubRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/pdf/translate", response_class=HTMLResponse)
+async def translate_pdf_form():
+    """
+    Serves a simple HTML form to upload a PDF for translation.
+    """
+    html_content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>PDF Translator</title>
+        <style>
+            body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+            .container { background: #f9fafb; padding: 2rem; border-radius: 8px; border: 1px solid #e5e7eb; }
+            h1 { color: #111827; }
+            form { display: flex; flex-direction: column; gap: 1rem; }
+            label { font_weight: 500; color: #374151; }
+            input, select, button { padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 4px; }
+            button { background: #2563eb; color: white; border: none; cursor: pointer; font-weight: bold; }
+            button:hover { background: #1d4ed8; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>VaaniPath PDF Translator</h1>
+            <form action="/pdf/translate" method="post" enctype="multipart/form-data" target="_blank">
+                <div>
+                    <label for="file">Select PDF File:</label>
+                    <input type="file" id="file" name="file" accept=".pdf" required>
+                </div>
+                <div>
+                    <label for="target_lang">Target Language:</label>
+                    <select id="target_lang" name="target_lang" required>
+                        <option value="hi-IN">Hindi (hi-IN)</option>
+                        <option value="marwadi">Marwadi</option>
+                        <option value="bn-IN">Bengali (bn-IN)</option>
+                        <option value="te-IN">Telugu (te-IN)</option>
+                        <option value="mr-IN">Marathi (mr-IN)</option>
+                        <option value="gu-IN">Gujarati (gu-IN)</option>
+                        <option value="pa-IN">Punjabi (pa-IN)</option>
+                        <option value="ta-IN">Tamil (ta-IN)</option>
+                    </select>
+                </div>
+                <button type="submit">Translate & View PDF</button>
+            </form>
+            <p style="margin-top: 1rem; color: #6b7280; font-size: 0.9rem;">
+                Note: The translation output will open in a new tab.
+            </p>
+        </div>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
+@app.post("/pdf/translate")
+async def translate_pdf_endpoint(
+    file: UploadFile = File(...),
+    target_lang: str = Form(...),
+):
+    """
+    Translates a PDF file using n8n webhook and returns the translated PDF.
+    """
+    if not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="File must be a PDF")
+        
+    job_id = f"pdf_{int(time.time())}"
+    output_dir = os.path.join(os.path.dirname(__file__), "output", job_id)
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Save Upload
+    input_path = os.path.join(output_dir, file.filename)
+    with open(input_path, "wb") as f:
+        f.write(await file.read())
+        
+    try:
+        from .pdf_service import translate_pdf_via_webhook
+        
+        # Run blocking IO in threadpool
+        from fastapi.concurrency import run_in_threadpool
+        output_pdf_path = await run_in_threadpool(
+            translate_pdf_via_webhook,
+            input_path,
+            target_lang,
+            output_dir
+        )
+        
+        filename = os.path.basename(output_pdf_path)
+        # Use content_disposition_type="inline" to preview in browser
+        return FileResponse(output_pdf_path, media_type="application/pdf", filename=filename, content_disposition_type="inline")
+        
+    except Exception as e:
+        logger.error(f"PDF Endpoint failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

@@ -51,11 +51,9 @@
     "error": "غلطی",
     "success": "کامیابی"
   },
-
   "header": {
     "title": "VAANIپتھ"
   },
-
   "landing": {
     "heroTitle": "اپنی زبان میں سیکھیں",
     "heroSubtitle": "AI پر مبنی کثیر لسانی لرننگ پلیٹ فارم",
@@ -90,7 +88,6 @@
     "joinStudents": "ہزاروں طلبہ کے ساتھ شامل ہوں جو VaaniPath کے ذریعے اپنا مستقبل بدل رہے ہیں۔",
     "createAccount": "اکاؤنٹ بنائیں"
   },
-
   "auth": {
     "email": "ای میل",
     "password": "پاس ورڈ",
@@ -126,12 +123,10 @@
     "preferredLanguage": "پسندیدہ زبان",
     "selectPreferredLanguage": "اپنی پسندیدہ زبان منتخب کریں"
   },
-
   "dashboard": {
     "welcomeMessage": "دوبارہ خوش آمدید",
     "completionPercentage": "مکمل ہونے کی شرح"
   },
-
   "myCourses": {
     "title": "میرے کورسز",
     "subtitle": "اپنی لرننگ جاری رکھیں",
@@ -145,7 +140,6 @@
     "enrollPrompt": "سیکھنا شروع کرنے کے لیے کسی کورس میں شامل ہوں",
     "browse": "کورسز دیکھیں"
   },
-
   "footer": {
     "description": "AI پر مبنی کثیر لسانی مواد آپ کی مادری زبان میں تعلیم کو آسان بناتا ہے۔",
     "quickLinks": "فوری لنکس",
@@ -157,7 +151,6 @@
     "feedback": "فیڈبیک",
     "allRightsReserved": "تمام حقوق محفوظ ہیں۔"
   },
-
   "browseCourses": {
     "title": "کورسز تلاش کریں",
     "subtitle": "سیکھنا شروع کرنے کے لئے کورسز دیکھیں اور شامل ہوں",
@@ -173,7 +166,6 @@
     "noCourses": "کوئی کورس نہیں ملا",
     "adjustFilters": "تلاش یا فلٹر تبدیل کر کے دوبارہ کوشش کریں"
   },
-
   "teacherDashboard": {
     "welcomeTeacher": "خوش آمدید",
     "subtitle": "اپنے کورسز منظم کریں اور پورے بھارت کے طلبہ کو متاثر کریں",
@@ -196,7 +188,6 @@
     "noCourses": "ابھی تک کوئی کورس نہیں",
     "createFirst": "اپنا پہلا کورس بنائیں"
   },
-
   "teacherCourses": {
     "title": "میرے کورسز",
     "subtitle": "اپنے کورسز منظم کریں اور طلبہ کی سرگرمی ٹریک کریں",
@@ -217,7 +208,6 @@
     "cancel": "منسوخ کریں",
     "loading": "آپ کے کورسز لوڈ ہو رہے ہیں..."
   },
-
   "teacherUpload": {
     "title": "مواد اپ لوڈ کریں",
     "subtitle": "اپنے کورس میں نئی ویڈیو شامل کریں",
@@ -245,7 +235,6 @@
     "fileTooLarge": "فائل بہت بڑی ہے",
     "maxSize": "زیادہ سے زیادہ فائل سائز 500MB"
   },
-
   "teacherQuizzes": {
     "title": "کوئز بنائیں",
     "subtitle": "طلبہ کی سمجھ جانچنے کیلئے کوئز بنائیں",
@@ -266,7 +255,6 @@
     "validationError": "تمام سوالات اور اختیارات درج کریں",
     "success": "کوئز کامیابی سے بنا لیا گیا!"
   },
-
   "teacherDoubts": {
     "title": "طلبہ کے سوال",
     "subtitle": "طلبہ کے سوالوں کے جواب دیں اور ان کی بہتر سیکھنے میں مدد کریں",
@@ -287,5 +275,49 @@
     "submitting": "جمع کیا جا رہا ہے...",
     "typeAnswer": "یہاں اپنا تفصیلی جواب لکھیں...",
     "selectDoubt": "تفصیل دیکھنے اور جواب دینے کیلئے سوال منتخب کریں"
+  },
+  "coursePlayer": {
+    "backToCourses": "میرے کورسز میں واپس",
+    "videoLanguage": "ویڈیو زبان",
+    "selectLanguage": "زبان منتخب کریں",
+    "processing": "پروسیسنگ ڈبنگ ...",
+    "noVideo": "کوئی ویڈیو منتخب نہیں ہے",
+    "noDescription": "کوئی تفصیل دستیاب نہیں ہے",
+    "completed": "مکمل",
+    "courseContent": "کورس کا مواد",
+    "courseProgress": "کورس کی پیشرفت",
+    "mins": "منٹ",
+    "cachedContent": "کیشڈ مواد",
+    "cachedContentDesc": "اس سے پہلے ڈبڈ ورژن کھیلنا",
+    "dubbingStarted": "ڈبنگ شروع ہوئی",
+    "dubbingStartedDesc": "{{زبان}} ورژن تیار کرنا ...",
+    "dubbingComplete": "ڈبنگ مکمل!",
+    "dubbingCompleteDesc": "اب منتخب زبان میں کھیل رہے ہیں",
+    "dubbingFailed": "ڈبنگ ناکام ہوگئی",
+    "dubbingFailedDesc": "اصل ورژن کھیلنا",
+    "videoCompleted": "ویڈیو مکمل!",
+    "videoCompletedDesc": "آپ کی پیشرفت بچ گئی ہے",
+    "errorTitle": "غلطی",
+    "loadError": "کورس لوڈ کرنے میں ناکام"
+  },
+  "profile": {
+    "title": "میرا پروفائل",
+    "personalInfo": "ذاتی معلومات",
+    "subtitle": "اپنے پروفائل کی تفصیلات دیکھیں اور اپ ڈیٹ کریں",
+    "uploadPhoto": "نئی تصویر اپ لوڈ کرنے کے لئے کلک کریں",
+    "contactNumber": "رابطہ نمبر",
+    "qualification": "قابلیت",
+    "specialization": "تخصص",
+    "domainExpertise": "ڈومین کی مہارت",
+    "saveChanges": "تبدیلیوں کو بچائیں",
+    "profileUpdated": "پروفائل تازہ کاری",
+    "profileSaved": "آپ کی پروفائل کی تفصیلات کامیابی کے ساتھ محفوظ ہوگئیں۔",
+    "updateFailed": "اپ ڈیٹ ناکام ہوگیا",
+    "failedMessage": "پروفائل کو اپ ڈیٹ کرنے میں ناکام۔ براہ کرم دوبارہ کوشش کریں۔",
+    "role": "کردار",
+    "email": "ای میل ایڈریس",
+    "name": "مکمل نام",
+    "teacher": "استاد",
+    "student": "طالب علم"
   }
 }

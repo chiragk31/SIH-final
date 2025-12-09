@@ -51,11 +51,9 @@
     "error": "غلطی",
     "success": "ڪامياب"
   },
-
   "header": {
     "title": "VAANIपथ"
   },
-
   "landing": {
     "heroTitle": "پنھنجي ٻوليءَ ۾ سکندا",
     "heroSubtitle": "AI تي ٻڌل گهڻٻولين وارو تعليمي پليٽفارم",
@@ -91,7 +89,6 @@
     "createAccount": "اڪائونٽ ٺاھيو",
     "copyright": "© 2025 VAANIپथ. سڀ ٻوليون — سکڻ جون صلاحيتون دستياب."
   },
-
   "auth": {
     "email": "ايميل",
     "password": "پاسورڊ",
@@ -127,12 +124,10 @@
     "preferredLanguage": "پسنديده ٻولي",
     "selectPreferredLanguage": "پسنديده ٻولي چونڊيو"
   },
-
   "dashboard": {
     "welcomeMessage": "دوبارہ ڀليڪار",
     "completionPercentage": "مڪمل ٿيڻ جي شرح"
   },
-
   "myCourses": {
     "title": "منھنجا ڪورس",
     "subtitle": "پنھنجو سکيا جو سفر جاري رکو",
@@ -146,7 +141,6 @@
     "enrollPrompt": "سکيا شروع ڪرڻ لاءِ ڪورس ۾ داخلا وٺو",
     "browse": "ڪورس براؤز ڪريو"
   },
-
   "footer": {
     "description": "AI تي مبني گهڻ ٻولين وارو مواد لوڪلائيزيشن انجڻ اوھان جي مادري ٻوليءَ ۾ تعليم آسان ڪري ٿو.",
     "quickLinks": "فوري لنڪ",
@@ -158,7 +152,6 @@
     "feedback": "راءِ",
     "allRightsReserved": "سڀ حق محفوظ."
   },
-
   "browseCourses": {
     "title": "ڪورس ڳولهيو",
     "subtitle": "سکيا شروع ڪرڻ لاءِ ڪورس براؤز ڪريو ۽ داخلا ڪريو",
@@ -174,7 +167,6 @@
     "noCourses": "ڪو ڪورس نه مليو",
     "adjustFilters": "پنھنجي ڳولا يا فلٽر تبديل ڪري ڪوشش ڪريو"
   },
-
   "teacherDashboard": {
     "welcomeTeacher": "ڀليڪار",
     "subtitle": "پنھنجا ڪورس مينيج ڪريو ۽ سڄي ڀارت ۾ شاگردن کي متاثر ڪريو",
@@ -197,7 +189,6 @@
     "noCourses": "ڪو ڪورس موجود ناهي",
     "createFirst": "شروعات ڪرڻ لاءِ پنهنجو پهريون ڪورس ٺاھيو"
   },
-
   "teacherCourses": {
     "title": "منھنجا ڪورس",
     "subtitle": "پنھنجا ڪورس مينيج ڪريو ۽ شاگردن جي شرڪت ٽريڪ ڪريو",
@@ -218,7 +209,6 @@
     "cancel": "منسوخ ڪريو",
     "loading": "توھان جا ڪورس لوڊ ٿي رھيا آھن..."
   },
-
   "teacherUpload": {
     "title": "مواد اپلوڊ ڪريو",
     "subtitle": "پنھنجي ڪورس ۾ نئون وڊيو شامل ڪريو",
@@ -246,7 +236,6 @@
     "fileTooLarge": "فائل تمام وڏو آهي",
     "maxSize": "وڌ کان وڌ فائل سائيز 500MB آهي"
   },
-
   "teacherQuizzes": {
     "title": "ڪوئز ٺاھيو",
     "subtitle": "شاگردن جي سمجھ جو جائزو وٺڻ لاءِ ڪوئز ٺاھيو",
@@ -267,7 +256,6 @@
     "validationError": "مهرباني ڪري سڀ سوال ۽ اختيار ڀريو",
     "success": "ڪوئز ڪاميابي سان ٺهي ويو!"
   },
-
   "teacherDoubts": {
     "title": "شاگردن جا سوال",
     "subtitle": "شاگردن جي سوالن جا جواب ڏيو ۽ انهن کي بھتر سکڻ ۾ مدد ڪريو",
@@ -288,5 +276,49 @@
     "submitting": "جمع ٿي رهيو آهي...",
     "typeAnswer": "هتي پنهنجو مفصل جواب لکو...",
     "selectDoubt": "تفصيل ڏسڻ ۽ جواب ڏيڻ لاءِ هڪ سوال چونڊيو"
+  },
+  "coursePlayer": {
+    "backToCourses": "واپس منهنجي ڪورسز ڏانهن",
+    "videoLanguage": "وڊيو ٻولي",
+    "selectLanguage": "ٻولي چونڊيو",
+    "processing": "ڊبنگ جي پروسيسنگ...",
+    "noVideo": "ڪابه وڊيو منتخب نه ڪئي وئي آهي",
+    "noDescription": "ڪابه وضاحت موجود ناهي",
+    "completed": "مڪمل ٿيو",
+    "courseContent": "ڪورس مواد",
+    "courseProgress": "ڪورس جي ترقي",
+    "mins": "منٽ",
+    "cachedContent": "محفوظ ڪيل مواد",
+    "cachedContentDesc": "اڳي ڊب ٿيل ورزن کيڏڻ",
+    "dubbingStarted": "ڊبنگ شروع ٿي وئي",
+    "dubbingStartedDesc": "تيار ٿي رهيو آهي {{language}} ورجن...",
+    "dubbingComplete": "ڊبنگ مڪمل!",
+    "dubbingCompleteDesc": "ھاڻي چونڊيل ٻولي ۾ راند ڪريو",
+    "dubbingFailed": "ڊبنگ ناڪام",
+    "dubbingFailedDesc": "راند جو اصل نسخو",
+    "videoCompleted": "وڊيو مڪمل ٿي وئي!",
+    "videoCompletedDesc": "توهان جي ترقي محفوظ ڪئي وئي آهي",
+    "errorTitle": "نقص",
+    "loadError": "ڪورس لوڊ ڪرڻ ۾ ناڪام ٿيو"
+  },
+  "profile": {
+    "title": "منهنجو پروفائل",
+    "personalInfo": "ذاتي معلومات",
+    "subtitle": "پنھنجي پروفائل جا تفصيل ڏسو ۽ تازه ڪاري ڪريو",
+    "uploadPhoto": "نئون فوٽو اپلوڊ ڪرڻ لاءِ ڪلڪ ڪريو",
+    "contactNumber": "رابطو نمبر",
+    "qualification": "قابليت",
+    "specialization": "اسپيشلائيزيشن",
+    "domainExpertise": "ڊومين جي ماهر",
+    "saveChanges": "تبديليون محفوظ ڪريو",
+    "profileUpdated": "پروفائل اپڊيٽ ٿيل",
+    "profileSaved": "توھان جي پروفائل جا تفصيل ڪاميابيءَ سان محفوظ ڪيا ويا آھن.",
+    "updateFailed": "اپڊيٽ ناڪام ٿيو",
+    "failedMessage": "پروفائل کي اپڊيٽ ڪرڻ ۾ ناڪام ٿيو. مهرباني ڪري ٻيهر ڪوشش ڪريو.",
+    "role": "ڪردار",
+    "email": "اي ميل پتو",
+    "name": "پورو نالو",
+    "teacher": "استاد",
+    "student": "شاگرد"
   }
 }

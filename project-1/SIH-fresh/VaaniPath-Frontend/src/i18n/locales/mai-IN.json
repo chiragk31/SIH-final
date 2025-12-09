@@ -51,11 +51,9 @@
     "error": "त्रुटि",
     "success": "सफलता"
   },
-
   "header": {
     "title": "VAANIपथ"
   },
-
   "landing": {
     "heroTitle": "अपन भाषा मे सीखू",
     "heroSubtitle": "AI-संचालित बहुभाषी शिक्षा मंच",
@@ -91,7 +89,6 @@
     "createAccount": "अपन खाता बनाऊ",
     "copyright": "© 2025 VAANIपथ. हर भाषा मे व्यावसायिक कौशल सुलभ।"
   },
-
   "auth": {
     "email": "ईमेल",
     "password": "पासवर्ड",
@@ -127,12 +124,10 @@
     "preferredLanguage": "पसंदीदा भाषा",
     "selectPreferredLanguage": "अपन पसंदीदा भाषा चुनू"
   },
-
   "dashboard": {
     "welcomeMessage": "फेरसँ स्वागत अछि",
     "completionPercentage": "पूर्णता"
   },
-
   "myCourses": {
     "title": "हमर कोर्स",
     "subtitle": "अपन सीखबाक यात्रा जारी राखू",
@@ -146,7 +141,6 @@
     "enrollPrompt": "अपन सीखबाक यात्रा शुरू करबाक लेल कोर्स मे नामांकन करू",
     "browse": "कोर्स ब्राउज करू"
   },
-
   "footer": {
     "description": "AI-संचालित बहुभाषी सामग्री इंजन अहाँक मातृभाषा मे शिक्षा सुलभ करैत अछि।",
     "quickLinks": "त्वरित लिंक",
@@ -158,7 +152,6 @@
     "feedback": "प्रतिक्रिया",
     "allRightsReserved": "सभ अधिकार सुरक्षित।"
   },
-
   "browseCourses": {
     "title": "कोर्स खोजू",
     "subtitle": "सीखब शुरू करबाक लेल कोर्स ब्राउज करू आ नामांकन करू",
@@ -174,7 +167,6 @@
     "noCourses": "कोनो कोर्स नहि भेटल",
     "adjustFilters": "अपन खोज वा फिल्टर समायोजित करबाक प्रयास करू"
   },
-
   "teacherDashboard": {
     "welcomeTeacher": "स्वागत अछि",
     "subtitle": "अपन कोर्सक प्रबंधन करू आ पूरा भारत मे छात्र केँ प्रेरित करू",
@@ -197,7 +189,6 @@
     "noCourses": "एखन धरि कोनो कोर्स नहि",
     "createFirst": "शुरू करबाक लेल अपन पहिल कोर्स बनाऊ"
   },
-
   "teacherCourses": {
     "title": "हमर कोर्स",
     "subtitle": "अपन कोर्सक प्रबंधन करू आ छात्र सहभागिता ट्रैक करू",
@@ -218,7 +209,6 @@
     "cancel": "रद्द करू",
     "loading": "अहाँक कोर्स लोड भ रहल अछि..."
   },
-
   "teacherUpload": {
     "title": "कंटेंट अपलोड करू",
     "subtitle": "अपन कोर्स मे नया वीडियो जोड़ू",
@@ -246,7 +236,6 @@
     "fileTooLarge": "फाइल बहुत पैघ अछि",
     "maxSize": "अधिकतम फाइल साइज़ 500MB अछि"
   },
-
   "teacherQuizzes": {
     "title": "क्विज बनाऊ",
     "subtitle": "छात्रक समझ जाँचबाक लेल क्विज तैयार करू",
@@ -267,7 +256,6 @@
     "validationError": "कृपया सभ प्रश्न आ विकल्प भरू",
     "success": "क्विज सफलतापूर्वक बनि गेल!"
   },
-
   "teacherDoubts": {
     "title": "छात्रक सवाल",
     "subtitle": "छात्रक सवालक उत्तर दिय आ ओकरा बेहतर सीखबाक मदद करू",
@@ -288,5 +276,49 @@
     "submitting": "सबमिट भ रहल अछि...",
     "typeAnswer": "एतय अपन विस्तृत उत्तर लिखू...",
     "selectDoubt": "विवरण देखबाक आ उत्तर देबाक लेल एकटा सवाल चुनू"
+  },
+  "coursePlayer": {
+    "backToCourses": "वापस हमर कोर्स",
+    "videoLanguage": "वीडियो भाषा",
+    "selectLanguage": "भाषा चुनू",
+    "processing": "प्रसंस्करण डबिंग...",
+    "noVideo": "कोनो वीडियो चयनित नहि",
+    "noDescription": "कोनो विवरण उपलब्ध नहि अछि",
+    "completed": "पूरा भेल .",
+    "courseContent": "पाठ्यक्रम सामग्री",
+    "courseProgress": "पाठ्यक्रम के प्रगति",
+    "mins": "मिन 2019।",
+    "cachedContent": "कैश सामग्री 2019।",
+    "cachedContentDesc": "पहिने नामित संस्करण खेलाइत",
+    "dubbingStarted": "डबिंग शुरू भेल",
+    "dubbingStartedDesc": "तैयारी {{language}} संस्करण...",
+    "dubbingComplete": "डबिंग पूरा!",
+    "dubbingCompleteDesc": "आब चयनित भाषा मे खेलाइत अछि",
+    "dubbingFailed": "डबिंग फेल",
+    "dubbingFailedDesc": "मूल संस्करण खेलना",
+    "videoCompleted": "वीडियो पूरा भेल!",
+    "videoCompletedDesc": "अहाँक प्रगति बचा लेल गेल अछि .",
+    "errorTitle": "दोष",
+    "loadError": "कोर्स लोड करबा मे असफल रहल"
+  },
+  "profile": {
+    "title": "हमर प्रोफ़ाइल",
+    "personalInfo": "व्यक्तिगत जानकारी",
+    "subtitle": "अपन प्रोफाइल विवरण देखू आ अपडेट करू",
+    "uploadPhoto": "नव फोटो अपलोड करबाक लेल क्लिक करू",
+    "contactNumber": "सम्पर्क संख्या २.",
+    "qualification": "योग्यता",
+    "specialization": "विशेषज्ञता ८.",
+    "domainExpertise": "डोमेन विशेषज्ञता २.",
+    "saveChanges": "परिवर्तन सहेजें",
+    "profileUpdated": "प्रोफाइल अद्यतन",
+    "profileSaved": "अहाँक प्रोफाइल विवरण सफलतापूर्वक सहेजल गेल अछि।",
+    "updateFailed": "अद्यतन विफल",
+    "failedMessage": "प्रोफाइल अपडेट करबा मे असफल। कृपया पुनः प्रयास करू।",
+    "role": "भूमिका",
+    "email": "ईमेल पता",
+    "name": "पूरा नाम",
+    "teacher": "शिक्षक",
+    "student": "छात्र"
   }
 }

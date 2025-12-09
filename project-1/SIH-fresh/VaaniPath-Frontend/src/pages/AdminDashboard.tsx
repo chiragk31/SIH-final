@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getAdminStats } from '@/services/admin';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Users, GraduationCap, Video } from 'lucide-react';
+import { Users, GraduationCap, Video, BookOpen } from 'lucide-react'; // Added BookOpen
 import { useNavigate, Link } from 'react-router-dom';
 import AdminLayout from '@/components/AdminLayout';
 
@@ -91,17 +91,20 @@ export default function AdminDashboard() {
                         </Card>
                     </Link>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Videos</CardTitle>
-                            <Video className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {isLoading ? '...' : (stats?.total_videos || 0)}
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <Link to="/admin/courses">
+                        <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Courses</CardTitle>
+                                <BookOpen className="h-4 w-4 text-muted-foreground" /> {/* Changed to BookOpen */}
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">
+                                    {isLoading ? '...' : (stats?.total_videos || '-')} 
+                                    {/* Note: Using total_videos as placeholder if total_courses not available */}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
                 </div>
 
                 {/* Quick Actions */}

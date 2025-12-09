@@ -27,19 +27,22 @@ const CoursePlayer = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { t, i18n } = useTranslation();
     const { user, isTeacher } = useAuth();
     const videoRef = useRef<HTMLVideoElement>(null);
-    const { i18n } = useTranslation();
+
 
     const [course, setCourse] = useState<CourseWithVideos | null>(null);
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
     const [progress, setProgress] = useState<Record<string, any>>({});
     const [isLoading, setIsLoading] = useState(true);
     const [watchedPercentage, setWatchedPercentage] = useState(0);
+    // 🚀 Initialize with user's preferred language (global state) or fallback to 'en-IN'
+    // This ensures consistency with site-wide language choice
     const [selectedLanguage, setSelectedLanguage] = useState(i18n.language || 'en-IN');
     const [isDubbing, setIsDubbing] = useState(false);
     const [dubbedUrl, setDubbedUrl] = useState<string | null>(null);
-    const [availableLanguages, setAvailableLanguages] = useState<string[]>(['en-IN']); // Languages available for current video
+    const [availableLanguages, setAvailableLanguages] = useState<string[]>(['en-IN']);
 
     const currentVideo = course?.videos?.[currentVideoIndex];
 
@@ -49,15 +52,11 @@ const CoursePlayer = () => {
             if (!currentVideo) return;
 
             try {
-                // Use batch endpoint to get all available languages at once
                 const response = await api.get(`/videos/${currentVideo.id}/available-languages`);
                 const availableLangs = response.data.available_languages || [];
-
-                // Original language is always available
                 setAvailableLanguages(['en-IN', ...availableLangs]);
             } catch (error) {
                 console.error('Error fetching available languages:', error);
-                // Fallback to just original language
                 setAvailableLanguages(['en-IN']);
             }
         };
@@ -65,24 +64,28 @@ const CoursePlayer = () => {
         fetchAvailableLanguages();
     }, [currentVideo]);
 
-    // Increment view count when video loads (after 5 seconds)
     useEffect(() => {
         if (currentVideo?.id) {
             const timer = setTimeout(() => {
                 api.post(`/videos/${currentVideo.id}/view`)
                     .catch(err => console.error("Failed to count view", err));
             }, 5000);
-
             return () => clearTimeout(timer);
         }
     }, [currentVideo?.id]);
 
-    // Reset/Sync language and dubbed URL when video changes or global language changes
+    // Reset dubbed URL but MAINTAIN language preference when video changes
     useEffect(() => {
-        const globalLang = i18n.language || 'en-IN';
-        setSelectedLanguage(globalLang);
+        // 🚀 Do NOT reset to 'en-IN'. Stick to current global/user preference.
+        // If the user preferred 'hi-IN', we try to stay on 'hi-IN'.
+        // However, we must reset dubbedURL because it's video-specific.
         setDubbedUrl(null);
         setIsDubbing(false);
+        
+        // Ensure local state matches global if it changed externally (though unlikely while mounted)
+        if (i18n.language && i18n.language !== selectedLanguage) {
+             setSelectedLanguage(i18n.language);
+        }
     }, [currentVideoIndex, i18n.language]);
 
     // Trigger dubbing/check when video or language changes
@@ -152,15 +155,15 @@ const CoursePlayer = () => {
             if (existingUrl) {
                 setDubbedUrl(existingUrl);
                 toast({
-                    title: 'Cached Content',
-                    description: 'Playing previously dubbed version',
+                    title: t('coursePlayer.cachedContent'),
+                    description: t('coursePlayer.cachedContentDesc'),
                 });
                 return;
             }
 
             toast({
-                title: 'Dubbing Started',
-                description: `Preparing ${INDIAN_LANGUAGES.find(l => l.code === language)?.name} version...`,
+                title: t('coursePlayer.dubbingStarted'),
+                description: t('coursePlayer.dubbingStartedDesc', { language: INDIAN_LANGUAGES.find(l => l.code === language)?.name }),
             });
 
             // Trigger dubbing via backend
@@ -186,8 +189,8 @@ const CoursePlayer = () => {
                 await loadCourse();
 
                 toast({
-                    title: 'Dubbing Complete!',
-                    description: 'Now playing in selected language',
+                    title: t('coursePlayer.dubbingComplete'),
+                    description: t('coursePlayer.dubbingCompleteDesc'),
                 });
             } else {
                 throw new Error('Dubbing timeout');
@@ -195,8 +198,8 @@ const CoursePlayer = () => {
         } catch (error) {
             console.error('Dubbing error:', error);
             toast({
-                title: 'Dubbing Failed',
-                description: 'Playing original version',
+                title: t('coursePlayer.dubbingFailed'),
+                description: t('coursePlayer.dubbingFailedDesc'),
                 variant: 'destructive',
             });
             setSelectedLanguage('en-IN');
@@ -210,7 +213,8 @@ const CoursePlayer = () => {
 
         try {
             setIsLoading(true);
-            const data = await getCourseById(courseId);
+            // 🚀 Pass selectedLanguage to backend
+            const data = await getCourseById(courseId, selectedLanguage);
             setCourse(data);
 
             // If videoId is in query params, find and set that video
@@ -224,8 +228,8 @@ const CoursePlayer = () => {
         } catch (error) {
             console.error('Failed to load course:', error);
             toast({
-                title: 'Error',
-                description: 'Failed to load course',
+                title: t('coursePlayer.errorTitle'),
+                description: t('coursePlayer.loadError'),
                 variant: 'destructive',
             });
             navigate('/my-courses');
@@ -273,8 +277,8 @@ const CoursePlayer = () => {
             }));
 
             toast({
-                title: 'Video Completed!',
-                description: 'Your progress has been saved',
+                title: t('coursePlayer.videoCompleted'),
+                description: t('coursePlayer.videoCompletedDesc'),
             });
 
             // Auto-play next video if available
@@ -353,7 +357,7 @@ const CoursePlayer = () => {
                     onClick={() => navigate(isTeacher ? '/teacher/courses' : '/my-courses')}
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to My Courses
+                    {t('coursePlayer.backToCourses')}
                 </Button>
 
                 <div className="grid lg:grid-cols-[1fr_380px] gap-6">
@@ -363,7 +367,7 @@ const CoursePlayer = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <Languages className="h-5 w-5 text-primary" />
-                                <h2 className="text-lg font-semibold">Video Language</h2>
+                                <h2 className="text-lg font-semibold">{t('coursePlayer.videoLanguage')}</h2>
                             </div>
                             <Select
                                 value={selectedLanguage}
@@ -371,7 +375,7 @@ const CoursePlayer = () => {
                                 disabled={isDubbing}
                             >
                                 <SelectTrigger className="w-[200px] glass-card border-white/20">
-                                    <SelectValue placeholder="Select Language" />
+                                    <SelectValue placeholder={t('coursePlayer.selectLanguage')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {INDIAN_LANGUAGES.map((lang) => {
@@ -402,7 +406,7 @@ const CoursePlayer = () => {
                                 <div className="w-full h-full flex items-center justify-center">
                                     <div className="text-center">
                                         <Loader2 className="h-16 w-16 text-primary animate-spin mx-auto mb-4" />
-                                        <p className="text-white text-lg">Processing dubbing...</p>
+                                        <p className="text-white text-lg">{t('coursePlayer.processing')}</p>
                                     </div>
                                 </div>
                             ) : currentVideo ? (
@@ -437,7 +441,7 @@ const CoursePlayer = () => {
                                 </video>
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-white">
-                                    <p>No video selected</p>
+                                    <p>{t('coursePlayer.noVideo')}</p>
                                 </div>
                             )}
                         </motion.div>
@@ -451,20 +455,20 @@ const CoursePlayer = () => {
                             <Card className="glass-card border-white/20 dark:border-white/10 shadow-xl">
                                 <CardContent className="p-6">
                                     <h1 className="text-2xl font-bold mb-2">
-                                        {currentVideo?.title || 'No video selected'}
+                                        {currentVideo?.title || t('coursePlayer.noVideo')}
                                     </h1>
                                     <p className="text-muted-foreground mb-4">
-                                        {currentVideo?.description || 'No description available'}
+                                        {currentVideo?.description || t('coursePlayer.noDescription')}
                                     </p>
                                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                                         <div className="flex items-center gap-1">
                                             <Clock className="h-4 w-4" />
-                                            <span>{Math.round((currentVideo?.duration || 0) / 60)} mins</span>
+                                            <span>{Math.round((currentVideo?.duration || 0) / 60)} {t('coursePlayer.mins')}</span>
                                         </div>
                                         {progress[currentVideo?.id || '']?.completed && (
                                             <div className="flex items-center gap-1 text-green-500">
                                                 <CheckCircle2 className="h-4 w-4" />
-                                                <span>Completed</span>
+                                                <span>{t('coursePlayer.completed')}</span>
                                             </div>
                                         )}
                                     </div>
@@ -479,13 +483,13 @@ const CoursePlayer = () => {
                             <CardContent className="p-6">
                                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                                     <BookOpen className="h-5 w-5 text-primary" />
-                                    Course Content
+                                    {t('coursePlayer.courseContent')}
                                 </h3>
 
                                 {/* Overall Progress */}
                                 <div className="mb-6">
                                     <div className="flex justify-between text-sm mb-2">
-                                        <span>Course Progress</span>
+                                        <span>{t('coursePlayer.courseProgress')}</span>
                                         <span>{Math.round(overallProgress)}%</span>
                                     </div>
                                     <Progress value={overallProgress} className="h-2" />
@@ -526,7 +530,7 @@ const CoursePlayer = () => {
                                                             {video.title}
                                                         </p>
                                                         <p className="text-xs text-muted-foreground mt-1">
-                                                            {Math.round(video.duration / 60)} mins
+                                                            {Math.round(video.duration / 60)} {t('coursePlayer.mins')}
                                                         </p>
                                                     </div>
                                                 </button>

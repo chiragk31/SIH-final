@@ -51,11 +51,9 @@
     "error": "ਗਲਤੀ",
     "success": "ਸਫਲ"
   },
-
   "header": {
     "title": "VAANIਪਥ"
   },
-
   "landing": {
     "heroTitle": "ਆਪਣੀ ਭਾਸ਼ਾ ਵਿੱਚ ਸਿੱਖੋ",
     "heroSubtitle": "AI ਚਲਿਤ ਬਹੁਭਾਸ਼ੀ ਸਿੱਖਿਆ ਪਲੇਟਫਾਰਮ",
@@ -90,7 +88,6 @@
     "joinStudents": "VaaniPath ਨਾਲ ਭਵਿੱਖ ਬਦਲ ਰਹੇ ਹਜ਼ਾਰਾਂ ਵਿਦਿਆਰਥੀਆਂ ਵਿੱਚ ਸ਼ਾਮਿਲ ਹੋਵੋ।",
     "createAccount": "ਅਕਾਊਂਟ ਬਣਾਓ"
   },
-
   "auth": {
     "email": "ਈਮੇਲ",
     "password": "ਪਾਸਵਰਡ",
@@ -126,12 +123,10 @@
     "preferredLanguage": "ਪਸੰਦੀਦਾ ਭਾਸ਼ਾ",
     "selectPreferredLanguage": "ਪਸੰਦੀਦਾ ਭਾਸ਼ਾ ਚੁਣੋ"
   },
-
   "dashboard": {
     "welcomeMessage": "ਫਿਰ ਤੋਂ ਸਵਾਗਤ ਹੈ",
     "completionPercentage": "ਪੂਰਨਤਾ"
   },
-
   "myCourses": {
     "title": "ਮੇਰੇ ਕੋਰਸ",
     "subtitle": "ਆਪਣਾ ਸਿੱਖਣ ਦਾ ਸਫਰ ਜਾਰੀ ਰੱਖੋ",
@@ -145,7 +140,6 @@
     "enrollPrompt": "ਆਪਣਾ ਸਿੱਖਣ ਦਾ ਸਫਰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਕੋਰਸ ਵਿੱਚ ਰਜਿਸਟਰ ਕਰੋ",
     "browse": "ਕੋਰਸ ਬ੍ਰਾਊਜ਼ ਕਰੋ"
   },
-
   "footer": {
     "description": "AI-ਚਲਿਤ ਬਹੁਭਾਸ਼ੀ ਸਮੱਗਰੀ ਲੋਕਲਾਈਜੇਸ਼ਨ ਇੰਜਣ ਤੁਹਾਡੀ ਮਾਤ ਭਾਸ਼ਾ ਵਿੱਚ ਸਿੱਖਿਆ ਸਹੂਲਤ ਬਣਾਉਂਦਾ ਹੈ।",
     "quickLinks": "ਤੇਜ਼ ਲਿੰਕ",
@@ -157,7 +151,6 @@
     "feedback": "ਫੀਡਬੈਕ",
     "allRightsReserved": "ਸਾਰੇ ਅਧਿਕਾਰ ਰਾਖਵੇਂ।"
   },
-
   "browseCourses": {
     "title": "ਕੋਰਸ ਖੋਜੋ",
     "subtitle": "ਸਿੱਖਣਾ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਕੋਰਸ ਬ੍ਰਾਊਜ਼ ਕਰੋ ਅਤੇ ਰਜਿਸਟਰ ਕਰੋ",
@@ -173,7 +166,6 @@
     "noCourses": "ਕੋਈ ਕੋਰਸ ਨਹੀਂ ਮਿਲਿਆ",
     "adjustFilters": "ਸਰਚ ਜਾਂ ਫਿਲਟਰ ਬਦਲ ਕੇ ਕੋਸ਼ਿਸ਼ ਕਰੋ"
   },
-
   "teacherDashboard": {
     "welcomeTeacher": "ਸਵਾਗਤ ਹੈ",
     "subtitle": "ਆਪਣੇ ਕੋਰਸ ਪ੍ਰਬੰਧਿਤ ਕਰੋ ਅਤੇ ਭਾਰਤ ਭਰ ਵਿੱਚ ਵਿਦਿਆਰਥੀਆਂ ਨੂੰ ਪ੍ਰੇਰਿਤ ਕਰੋ",
@@ -196,7 +188,6 @@
     "noCourses": "ਹੁਣ ਤੱਕ ਕੋਈ ਕੋਰਸ ਨਹੀਂ",
     "createFirst": "ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਆਪਣਾ ਪਹਿਲਾ ਕੋਰਸ ਬਣਾਓ"
   },
-
   "teacherCourses": {
     "title": "ਮੇਰੇ ਕੋਰਸ",
     "subtitle": "ਆਪਣੇ ਕੋਰਸ ਪ੍ਰਬੰਧਿਤ ਕਰੋ ਅਤੇ ਵਿਦਿਆਰਥੀ ਭਾਗੀਦਾਰੀ ਟਰੈਕ ਕਰੋ",
@@ -217,7 +208,6 @@
     "cancel": "ਰੱਦ ਕਰੋ",
     "loading": "ਤੁਹਾਡੇ ਕੋਰਸ ਲੋਡ ਹੋ ਰਹੇ ਹਨ..."
   },
-
   "teacherUpload": {
     "title": "ਸਮੱਗਰੀ ਅੱਪਲੋਡ ਕਰੋ",
     "subtitle": "ਆਪਣੇ ਕੋਰਸ ਵਿੱਚ ਇੱਕ ਨਵਾਂ ਵੀਡੀਓ ਸ਼ਾਮਿਲ ਕਰੋ",
@@ -245,7 +235,6 @@
     "fileTooLarge": "ਫਾਇਲ ਬਹੁਤ ਵੱਡੀ ਹੈ",
     "maxSize": "ਅਧਿਕਤਮ ਫਾਇਲ ਸਾਈਜ਼ 500MB"
   },
-
   "teacherQuizzes": {
     "title": "ਕ੍ਵਿਜ ਬਣਾਓ",
     "subtitle": "ਵਿਦਿਆਰਥੀਆਂ ਦੀ ਸਮਝ ਦੀ ਜਾਂਚ ਕਰਨ ਲਈ ਕ੍ਵਿਜ ਬਣਾਓ",
@@ -266,7 +255,6 @@
     "validationError": "ਕਿਰਪਾ ਕਰਕੇ ਸਾਰੇ ਸਵਾਲ ਅਤੇ ਵਿਕਲਪ ਭਰੋ",
     "success": "ਕ੍ਵਿਜ ਸਫਲਤਾਪੂਰਵਕ ਬਣ ਗਿਆ!"
   },
-
   "teacherDoubts": {
     "title": "ਵਿਦਿਆਰਥੀਆਂ ਦੇ ਸਵਾਲ",
     "subtitle": "ਵਿਦਿਆਰਥੀਆਂ ਦੇ ਸਵਾਲਾਂ ਦੇ ਜਵਾਬ ਦਿਓ ਅਤੇ ਉਹਨਾਂ ਨੂੰ ਬੇਹਤਰ ਸਿੱਖਣ ਵਿੱਚ ਮਦਦ ਕਰੋ",
@@ -287,5 +275,49 @@
     "submitting": "ਸਬਮਿਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
     "typeAnswer": "ਇਥੇ ਆਪਣਾ ਵਿਸਥਾਰ ਪੂਰਵਕ ਜਵਾਬ ਲਿਖੋ...",
     "selectDoubt": "ਵੇਰਵਾ ਦੇਖਣ ਅਤੇ ਜਵਾਬ ਦੇਣ ਲਈ ਸਵਾਲ ਚੁਣੋ"
+  },
+  "coursePlayer": {
+    "backToCourses": "ਮੇਰੇ ਕੋਰਸਾਂ 'ਤੇ ਵਾਪਸ ਜਾਓ",
+    "videoLanguage": "ਵੀਡੀਓ ਭਾਸ਼ਾ",
+    "selectLanguage": "ਭਾਸ਼ਾ ਚੁਣੋ",
+    "processing": "ਡਬਿੰਗ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ...",
+    "noVideo": "ਕੋਈ ਵੀਡੀਓ ਨਹੀਂ ਚੁਣਿਆ ਗਿਆ",
+    "noDescription": "ਕੋਈ ਵੇਰਵਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ",
+    "completed": "ਪੂਰਾ ਹੋਇਆ",
+    "courseContent": "ਕੋਰਸ ਸਮੱਗਰੀ",
+    "courseProgress": "ਕੋਰਸ ਦੀ ਪ੍ਰਗਤੀ",
+    "mins": "ਮਿੰਟ",
+    "cachedContent": "ਕੈਸ਼ ਕੀਤੀ ਸਮੱਗਰੀ",
+    "cachedContentDesc": "ਪਹਿਲਾਂ ਡੱਬ ਕੀਤਾ ਸੰਸਕਰਣ ਚਲਾ ਰਿਹਾ ਹੈ",
+    "dubbingStarted": "ਡਬਿੰਗ ਸ਼ੁਰੂ ਹੋ ਗਈ",
+    "dubbingStartedDesc": "{{language}} ਸੰਸਕਰਣ ਤਿਆਰ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
+    "dubbingComplete": "ਡਬਿੰਗ ਮੁਕੰਮਲ!",
+    "dubbingCompleteDesc": "ਹੁਣ ਚੁਣੀ ਗਈ ਭਾਸ਼ਾ ਵਿੱਚ ਚੱਲ ਰਿਹਾ ਹੈ",
+    "dubbingFailed": "ਡਬਿੰਗ ਅਸਫਲ ਰਹੀ",
+    "dubbingFailedDesc": "ਅਸਲੀ ਸੰਸਕਰਣ ਚਲਾ ਰਿਹਾ ਹੈ",
+    "videoCompleted": "ਵੀਡੀਓ ਪੂਰਾ ਹੋਇਆ!",
+    "videoCompletedDesc": "ਤੁਹਾਡੀ ਤਰੱਕੀ ਨੂੰ ਸੰਭਾਲਿਆ ਗਿਆ ਹੈ",
+    "errorTitle": "ਗਲਤੀ",
+    "loadError": "ਕੋਰਸ ਲੋਡ ਕਰਨ ਵਿੱਚ ਅਸਫਲ"
+  },
+  "profile": {
+    "title": "ਮੇਰੀ ਪ੍ਰੋਫ਼ਾਈਲ",
+    "personalInfo": "ਵਿਅਕਤੀਗਤ ਜਾਣਕਾਰੀ",
+    "subtitle": "ਆਪਣੇ ਪ੍ਰੋਫਾਈਲ ਵੇਰਵੇ ਦੇਖੋ ਅਤੇ ਅੱਪਡੇਟ ਕਰੋ",
+    "uploadPhoto": "ਨਵੀਂ ਫੋਟੋ ਅੱਪਲੋਡ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ",
+    "contactNumber": "ਸੰਪਰਕ ਨੰਬਰ",
+    "qualification": "ਯੋਗਤਾ",
+    "specialization": "ਵਿਸ਼ੇਸ਼ਤਾ",
+    "domainExpertise": "ਡੋਮੇਨ ਮਹਾਰਤ",
+    "saveChanges": "ਤਬਦੀਲੀਆਂ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰੋ",
+    "profileUpdated": "ਪ੍ਰੋਫਾਈਲ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ",
+    "profileSaved": "ਤੁਹਾਡੇ ਪ੍ਰੋਫਾਈਲ ਵੇਰਵੇ ਸਫਲਤਾਪੂਰਵਕ ਸੁਰੱਖਿਅਤ ਕੀਤੇ ਗਏ ਹਨ।",
+    "updateFailed": "ਅੱਪਡੇਟ ਅਸਫਲ ਰਿਹਾ",
+    "failedMessage": "ਪ੍ਰੋਫਾਈਲ ਅੱਪਡੇਟ ਕਰਨ ਵਿੱਚ ਅਸਫਲ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "role": "ਭੂਮਿਕਾ",
+    "email": "ਈਮੇਲ ਪਤਾ",
+    "name": "ਪੂਰਾ ਨਾਂਮ",
+    "teacher": "ਅਧਿਆਪਕ",
+    "student": "ਵਿਦਿਆਰਥੀ"
   }
 }

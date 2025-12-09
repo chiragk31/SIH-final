@@ -45,6 +45,7 @@ export const enrollInCourse = async (courseId: string): Promise<Enrollment> => {
 export const getMyEnrollments = async (params?: {
     page?: number;
     page_size?: number;
+    language?: string; // 🚀 Added language support
 }): Promise<{ enrollments: Enrollment[]; total: number; page: number; page_size: number }> => {
     const response = await axios.get(`${API_URL}/enrollments/my`, {
         params,

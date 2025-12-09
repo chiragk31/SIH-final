@@ -15,14 +15,14 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 
 const MyCourses = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { toast } = useToast();
     const { user } = useAuth();
 
     const { data, isLoading } = useQuery({
-        queryKey: ['my-enrollments'],
-        queryFn: () => getMyEnrollments(),
+        queryKey: ['my-enrollments', i18n.language], // 🚀 Add language to queryKey
+        queryFn: () => getMyEnrollments({ language: i18n.language }), // 🚀 Pass language
         enabled: !!user,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });

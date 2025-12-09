@@ -2,7 +2,7 @@ import os
 import logging
 from typing import Dict, Optional
 
-from google.cloud import texttospeech
+from google.cloud import texttospeech_v1beta1 as texttospeech
 from google.oauth2 import service_account
 
 from .utils import setup_logger
@@ -10,7 +10,7 @@ from .utils import setup_logger
 logger = setup_logger("tts_google")
 
 # Path to the service account key file
-KEY_FILE = os.path.join(os.path.dirname(__file__), "gcp_key.json")
+KEY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "service_account.json")
 
 # Voice Mapping Strategies for Indian Languages
 # Gender mapping strategy:
@@ -154,14 +154,25 @@ def get_voice_params(lang_code: str, gender: str) -> Optional[texttospeech.Voice
         ssml_gender=ssml_gender
     )
 
-def tts_google(text: str, lang: str, output_path: str, gender: str = 'male') -> bool:
+def tts_google(text: str, lang: str, output_path: str, gender: str = 'male') -> tuple[str | None, list[tuple[float, float]]]:
     """Synthesize speech using Google Cloud TTS"""
     client = get_client()
     if not client:
-        return False
+        return None, []
 
     try:
-        input_text = texttospeech.SynthesisInput(text=text)
+        # Check if we need to insert SSML marks for BEEP
+        is_ssml = False
+        input_text_param = None
+        beep_regions = []
+
+        if "BEEP" in text:
+            is_ssml = True
+            # Replace BEEP with SSML marks
+            ssml_text = "<speak>" + text.replace("&", "&amp;").replace("BEEP", '<mark name="beep_start"/>BEEP<mark name="beep_end"/>') + "</speak>"
+            input_text_param = texttospeech.SynthesisInput(ssml=ssml_text)
+        else:
+            input_text_param = texttospeech.SynthesisInput(text=text)
         
         voice_params = get_voice_params(lang, gender)
         
@@ -171,17 +182,40 @@ def tts_google(text: str, lang: str, output_path: str, gender: str = 'male') -> 
             pitch=0.0
         )
 
-        response = client.synthesize_speech(
-            input=input_text,
-            voice=voice_params,
-            audio_config=audio_config
-        )
+        if is_ssml:
+            response = client.synthesize_speech(
+                request=texttospeech.SynthesizeSpeechRequest(
+                    input=input_text_param,
+                    voice=voice_params,
+                    audio_config=audio_config,
+                    enable_time_pointing=["SSML_MARK"]
+                )
+            )
+            
+            # Parse timepoints
+            start_times = []
+            end_times = []
+            
+            for tp in response.timepoints:
+                if tp.mark_name == "beep_start":
+                    start_times.append(tp.time_seconds)
+                elif tp.mark_name == "beep_end":
+                    end_times.append(tp.time_seconds)
+                    
+            for s, e in zip(start_times, end_times):
+                beep_regions.append((s, e))
+        else:
+            response = client.synthesize_speech(
+                input=input_text_param,
+                voice=voice_params,
+                audio_config=audio_config
+            )
 
         with open(output_path, "wb") as out:
             out.write(response.audio_content)
             
-        return True
+        return output_path, beep_regions
         
     except Exception as e:
         logger.error(f"Google TTS synthesis failed: {e}")
-        return False
+        return None, []

@@ -75,7 +75,7 @@ const StudentDashboard = () => {
       <PremiumBackground />
       <Header isAuthenticated userType="student" />
 
-      <div className="container px-4 py-12 lg:py-16 relative z-10">
+      <div className="container px-4 pt-32 pb-12 relative z-10">
         {/* Welcome Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
