@@ -31,15 +31,15 @@ const BrowseCourses = () => {
     const { user, isTeacher } = useAuth();
 
     // Sync filter with global language
-    useEffect(() => {
-        if (i18n.language) {
-            const langPart = i18n.language.split('-')[0];
-            // Only auto-select if it matches one of our filter options
-            if (['en', 'hi', 'te', 'ta', 'mr', 'bn'].includes(langPart)) {
-                setSelectedLanguage(langPart);
-            }
-        }
-    }, [i18n.language]);
+    // useEffect(() => {
+    //     if (i18n.language) {
+    //         const langPart = i18n.language.split('-')[0];
+    //         // Only auto-select if it matches one of our filter options
+    //         if (['en', 'hi', 'te', 'ta', 'mr', 'bn'].includes(langPart)) {
+    //             setSelectedLanguage(langPart);
+    //         }
+    //     }
+    // }, [i18n.language]);
 
     const [courses, setCourses] = useState<Course[]>([]);
     const [enrolledCourses, setEnrolledCourses] = useState<Set<string>>(new Set());

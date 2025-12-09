@@ -58,11 +58,21 @@ class Settings(BaseSettings):
     def audio_formats_list(self) -> List[str]:
         return self.ALLOWED_AUDIO_FORMATS.split(",")
 
-    ALLOWED_DOC_FORMATS: str = os.getenv("ALLOWED_DOC_FORMATS", "pdf,doc,docx,ppt,pptx,txt")
+    ALLOWED_DOC_FORMATS: str = os.getenv("ALLOWED_DOC_FORMATS", "pdf,doc,docx,ppt,pptx,txt,jpg,jpeg,png,webp")
 
     @property
     def doc_formats_list(self) -> List[str]:
-        return self.ALLOWED_DOC_FORMATS.split(",")
+        formats = self.ALLOWED_DOC_FORMATS.split(",")
+        # Ensure image formats are always included
+        always_allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif']
+        for ext in always_allowed:
+            if ext not in formats:
+                formats.append(ext)
+        return formats
+
+    @property
+    def document_formats_list(self) -> List[str]:
+        return self.doc_formats_list
     
     # ML Models
     WHISPER_MODEL_SIZE: str = os.getenv("WHISPER_MODEL_SIZE", "medium")

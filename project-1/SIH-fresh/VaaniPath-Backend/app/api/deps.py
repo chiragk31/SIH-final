@@ -8,6 +8,10 @@ from app.db.supabase_client import supabase
 security = HTTPBearer(auto_error=False)
 
 
+import time
+
+# ... imports ...
+
 def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
 ) -> dict:
@@ -47,8 +51,28 @@ def get_current_user(
                 "is_admin": True  # Mock user is admin for testing
             }
         
-        # Get user from Supabase
-        response = supabase.table("users").select("*").eq("id", user_id).execute()
+        # Get user from Supabase with Retry Logic for Windows socket errors
+        retries = 3
+        response = None
+        last_exception = None
+        
+        for attempt in range(retries):
+            try:
+                response = supabase.table("users").select("*").eq("id", user_id).execute()
+                break # Success
+            except Exception as e:
+                last_exception = e
+                if attempt < retries - 1:
+                    time.sleep(0.1) # Wait briefly before retry
+                else:
+                    print(f"Supabase auth failed after {retries} retries: {e}")
+        
+        if not response:
+             # If we exhausted retries and have an exception, re-raise or handle
+             if last_exception:
+                 # Check if it looks like a connection error, otherwise 500
+                 print(f"Auth Error Details: {last_exception}")
+                 raise HTTPException(status_code=500, detail="Authentication service unavailable")
         
         if not response.data:
             raise HTTPException(

@@ -32,6 +32,7 @@ export interface VideoUploadData {
     target_languages: string;
     course_id: string;
     tutor_gender: string;
+    content_type?: 'video' | 'audio' | 'document' | 'image';
 }
 
 // Upload video with progress tracking
@@ -49,6 +50,7 @@ export const uploadVideo = async (
     formData.append('target_languages', data.target_languages);
     formData.append('course_id', data.course_id);
     formData.append('tutor_gender', data.tutor_gender);
+    if (data.content_type) formData.append('content_type', data.content_type);
 
     const response = await api.post<Video>('/videos/upload', formData, {
         headers: {
@@ -113,12 +115,12 @@ export const submitDubbingFeedback = async (videoId: string, feedback: DubbingFe
     return response.data;
 };
 
-export const getAvailableLanguages = async (videoId: string): Promise<{video_id: string, available_languages: string[]}> => {
+export const getAvailableLanguages = async (videoId: string): Promise<{ video_id: string, available_languages: string[] }> => {
     const response = await api.get(`/videos/${videoId}/available-languages`);
     return response.data;
 };
 
-export const getDubbedVideoUrl = async (videoId: string, language: string): Promise<{url: string}> => {
+export const getDubbedVideoUrl = async (videoId: string, language: string): Promise<{ url: string }> => {
     const response = await api.get(`/videos/${videoId}/dubbed/${language}`);
     return response.data;
 };

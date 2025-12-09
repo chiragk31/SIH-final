@@ -736,14 +736,45 @@ async def get_dubbed_video(
                 "status": "completed"
             }
             
-        # If processing, return status
+        # If processing, return status UNLESS it's stuck (stale)
         if translation.get("status") in ["pending", "processing"]:
-            return {
-                "video_id": video_id,
-                "language": language,
-                "status": "processing",
-                "message": "Dubbing in progress"
-            }
+            # Check for staleness (e.g., server restarted while processing)
+            updated_at_str = translation.get("updated_at") or translation.get("created_at")
+            is_stale = False
+            
+            if updated_at_str:
+                try:
+                    # Handle Z suffix if present
+                    if updated_at_str.endswith('Z'):
+                        updated_at_str = updated_at_str[:-1]
+                    
+                    # Truncate microseconds if needed to avoid format errors
+                    updated_at_str = updated_at_str.split('+')[0]
+                    
+                    last_update = datetime.fromisoformat(updated_at_str)
+                    time_diff = (datetime.utcnow() - last_update).total_seconds()
+                    
+                    print(f"DEBUG: Job status is {translation.get('status')}. Last update: {time_diff:.1f}s ago")
+                    
+                    # Reduce stale timeout to 120s (2 mins) to unblock user faster
+                    if time_diff > 120: 
+                        is_stale = True
+                        print(f"⚠️ DEBUG: Job is STALE (>120s). Force restarting...")
+                except Exception as e:
+                    print(f"Error parsing date {updated_at_str}: {e}")
+                    # If date parse fails, assume not stale to be safe? Or stale? 
+                    # Let's assume stale if we can't parse, so we don't block forever.
+                    is_stale = False
+            
+            if not is_stale:
+                return {
+                    "video_id": video_id,
+                    "language": language,
+                    "status": "processing",
+                    "message": "Dubbing in progress"
+                }
+            # If is_stale is True, we proceed downwards to re-trigger the task
+
             
         # If failed, we might want to retry?
         if translation.get("status") == "failed":
@@ -751,6 +782,10 @@ async def get_dubbed_video(
             pass
 
     # If not exists or failed, trigger new job
+    
+    # Create/Update pending record
+    # If not exists or failed, trigger new job
+    print(f"DEBUG: Triggering NEW dubbing job for {video_id} in {language}")
     
     # Create/Update pending record
     if translation_response.data:
@@ -761,11 +796,6 @@ async def get_dubbed_video(
         }).eq("video_id", video_id).eq("language", language).execute()
     else:
         # Create new record
-        # We need translated_text field as it is NOT NULL in schema.
-        # We'll put a placeholder or empty string for now, assuming ML service populates it later?
-        # Actually, the schema says `translated_text TEXT NOT NULL`.
-        # We should probably make it nullable or provide a default.
-        # For now, empty string.
         supabase.table("translations").insert({
             "video_id": video_id,
             "language": language,
@@ -774,7 +804,9 @@ async def get_dubbed_video(
         }).execute()
     
     # Trigger background task
-    background_tasks.add_task(process_dubbing_task, video_id, language)
+    # Explicitly passing 'video' content_type
+    background_tasks.add_task(process_dubbing_task, video_id, language, "video")
+    print(f"DEBUG: Background task queued for {video_id} ({language})")
     
     return {
         "video_id": video_id,

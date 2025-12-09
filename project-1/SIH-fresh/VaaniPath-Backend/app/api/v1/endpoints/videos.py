@@ -27,6 +27,7 @@ async def upload_video(
     target_languages: str = Form(...),  # Comma-separated
     tutor_gender: str = Form('male'),
     course_id: Optional[str] = Form(None),
+    content_type: Optional[str] = Form(None),
     background_tasks: BackgroundTasks = BackgroundTasks(),
     current_user: dict = Depends(get_current_teacher)
 ):
@@ -43,24 +44,35 @@ async def upload_video(
         
         file_ext = file.filename.split('.')[-1].lower()
         
-        # Determine content type and resource type
-        content_type = "video"
+        # Determine resource type based on content_type or extension
         resource_type = "video"
+        
+        # If client explicitly says it's an image (e.g. from TeacherUpload)
+        if content_type == "image":
+             if file_ext not in settings.document_formats_list: # Reusing doc list for now which includes imgs
+                  # Or strict check? Let's check against allow-list
+                  pass
+             resource_type = "image"
         
         if file_ext in settings.video_formats_list:
             content_type = "video"
             resource_type = "video"
         elif file_ext in settings.audio_formats_list:
             content_type = "audio"
-            resource_type = "video"  # Cloudinary treats audio as video resource_type usually, or 'auto'
+            resource_type = "video" 
         elif file_ext in settings.document_formats_list:
-            content_type = "document"
-            resource_type = "raw"  # Documents are 'raw' or 'image' depending on type
+            # Check if it's an image extension
+            if file_ext in ['jpg', 'jpeg', 'png', 'webp', 'gif']:
+                 content_type = "image"
+                 resource_type = "image"
+            else:
+                 content_type = "document"
+                 resource_type = "raw"
         else:
             allowed = settings.video_formats_list + settings.audio_formats_list + settings.document_formats_list
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid file format. Allowed: {', '.join(allowed)}"
+                detail=f"Invalid file format. Allowed types: {', '.join(allowed)}"
             )
         
         # Generate temp ID for Cloudinary path (will use actual video_id from DB response)

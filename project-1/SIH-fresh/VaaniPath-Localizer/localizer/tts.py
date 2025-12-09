@@ -262,7 +262,7 @@ def tts_synthesize(text: str, lang: str, output_path: str, gender: str = 'male')
              # For now, default.
              _tts_google(text_for_tts, lang, output_path)
              logger.info(f"Saved TTS (Google Cloud) to {output_path}")
-             return output_path
+             return output_path, []
         except Exception as e:
              logger.error(f"Google Cloud TTS failed: {e}; falling back to gTTS")
 

@@ -161,7 +161,14 @@ class PodcastGenerator:
             ]
 
     async def generate_audio(self, script: List[Dict[str, str]]) -> str:
-        """Generate audio for the script using ElevenLabs with gTTS fallback."""
+        """Generate audio for the script using Google Cloud TTS (Primary), ElevenLabs (Secondary), then gTTS (Fallback)."""
+        # Import here to avoid circulars if any, but ideally at top.
+        try:
+            from .tts_google import tts_google
+        except ImportError:
+            print("⚠️ tts_google module not found")
+            tts_google = None
+
         audio_segments = []
         
         for i, line in enumerate(script):
@@ -169,35 +176,62 @@ class PodcastGenerator:
             text = line["text"]
             filename = f"segment_{i}_{speaker}.mp3"
             filepath = self.output_dir / filename
+            output_str_path = str(filepath)
             
-            # Try ElevenLabs first
-            if self.elevenlabs_client:
+            # 1. Try Google Cloud TTS (Primary)
+            success = False
+            try:
+                if tts_google:
+                    # Map speakers to genders
+                    gender = "male" if self.voices.get(speaker, {}).get("gender") == "male" else "female"
+                    
+                    # Assuming basic Hindi as default if language not passed explicitly to this method separately?
+                    # The script generator accepted a language, but here we only have text.
+                    # We can try to detect or pass language down. 
+                    # For now, let's assume 'hi-IN' if it looks like Hindi or 'en-IN' if English.
+                    # Since generate_audio doesn't take language arg, we might default to en-IN or hi-IN.
+                    # A better fix requires passing language to generate_audio.
+                    # Let's infer simple:
+                    lang_code = "hi-IN" if any(ord(c) > 128 for c in text[:20]) else "en-IN"
+                    
+                    print(f"🎙️ Google TTS ({lang_code}) for {speaker}...")
+                    success = tts_google(text=text, lang=lang_code, output_path=output_str_path, gender=gender)
+                    if success:
+                        audio_segments.append(filepath)
+                        continue
+            except Exception as e:
+                print(f"⚠️ Google TTS failed: {e}")
+
+            # 2. Try ElevenLabs (Secondary)
+            if not success and self.elevenlabs_client:
+                print(f"🔄 Falling back to ElevenLabs for {speaker}...")
                 try:
                     voice_id = self.voices.get(speaker, {}).get("elevenlabs_id")
                     if voice_id:
-                        # Updated code for ElevenLabs v1.0+ SDK
                         audio = self.elevenlabs_client.text_to_speech.convert(
                             text=text,
                             voice_id=voice_id,
                             model_id="eleven_multilingual_v2"
                         )
-                        # Save audio
                         with open(filepath, "wb") as f:
                             for chunk in audio:
                                 f.write(chunk)
                         audio_segments.append(filepath)
                         continue
                 except Exception as e:
-                    print(f"⚠️ ElevenLabs failed for {speaker}: {e}. Falling back to gTTS.")
+                    print(f"⚠️ ElevenLabs failed: {e}")
 
-            # Fallback to gTTS
-            try:
-                from gtts import gTTS
-                tts = gTTS(text=text, lang='en', tld='co.in') 
-                tts.save(str(filepath))
-                audio_segments.append(filepath)
-            except Exception as e:
-                print(f"❌ gTTS failed for {speaker}: {e}")
+            # 3. Fallback to gTTS (Tertiary)
+            if not success:
+                print(f"🔄 Falling back to gTTS for {speaker}...")
+                try:
+                    from gtts import gTTS
+                    tts = gTTS(text=text, lang='en', tld='co.in') 
+                    tts.save(output_str_path)
+                    audio_segments.append(filepath)
+                except Exception as e:
+                    print(f"❌ gTTS failed for {speaker}: {e}")
+                    raise Exception(f"All TTS methods failed for segment {i}")
 
         if not audio_segments:
             raise Exception("Failed to generate any audio segments")
@@ -205,8 +239,9 @@ class PodcastGenerator:
         output_filename = f"podcast_final_{random.randint(1000, 9999)}.mp3"
         output_path = self.output_dir / output_filename
 
-        # Try merging with Pydub (requires ffmpeg and Python < 3.13)
+        # Try merging with Pydub
         if PYDUB_AVAILABLE:
+
             try:
                 combined = AudioSegment.empty()
                 silence = AudioSegment.silent(duration=500) 

@@ -85,7 +85,7 @@ const TeacherUpload = () => {
       case 'audio':
         return '.mp3,.wav,.m4a,.aac';
       case 'document':
-        return '.pdf,.doc,.docx,.ppt,.pptx,.txt';
+        return '.pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png';
       default:
         return '';
     }
@@ -140,10 +140,9 @@ const TeacherUpload = () => {
           domain: formData.domain,
           source_language: formData.source_language,
           target_languages: formData.target_languages,
-          source_language: formData.source_language,
-          target_languages: formData.target_languages,
           course_id: selectedCourseId,
-          tutor_gender: tutorGender
+          tutor_gender: tutorGender,
+          content_type: (contentType === 'document' && formData.file?.type.startsWith('image/')) ? 'image' : contentType
         },
         (progress) => {
           setUploadProgress(progress);
@@ -281,33 +280,33 @@ const TeacherUpload = () => {
 
                 {/* Tutor Gender Selection */}
                 <div className="space-y-3 mb-6">
-                    <Label>Tutor Voice Gender (for AI Dubbing) *</Label>
-                    <RadioGroup 
-                      value={tutorGender} 
-                      onValueChange={(v) => setTutorGender(v as 'male' | 'female')}
-                      className="grid grid-cols-2 gap-4"
-                    >
-                      <div>
-                        <RadioGroupItem value="male" id="male" className="peer sr-only" />
-                        <Label
-                          htmlFor="male"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:text-primary cursor-pointer"
-                        >
-                          <User className="mb-3 h-6 w-6" />
-                          Male Voice
-                        </Label>
-                      </div>
-                      <div>
-                        <RadioGroupItem value="female" id="female" className="peer sr-only" />
-                        <Label
-                          htmlFor="female"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:text-primary cursor-pointer"
-                        >
-                          <User className="mb-3 h-6 w-6" />
-                          Female Voice
-                        </Label>
-                      </div>
-                    </RadioGroup>
+                  <Label>Tutor Voice Gender (for AI Dubbing) *</Label>
+                  <RadioGroup
+                    value={tutorGender}
+                    onValueChange={(v) => setTutorGender(v as 'male' | 'female')}
+                    className="grid grid-cols-2 gap-4"
+                  >
+                    <div>
+                      <RadioGroupItem value="male" id="male" className="peer sr-only" />
+                      <Label
+                        htmlFor="male"
+                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:text-primary cursor-pointer"
+                      >
+                        <User className="mb-3 h-6 w-6" />
+                        Male Voice
+                      </Label>
+                    </div>
+                    <div>
+                      <RadioGroupItem value="female" id="female" className="peer sr-only" />
+                      <Label
+                        htmlFor="female"
+                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:text-primary cursor-pointer"
+                      >
+                        <User className="mb-3 h-6 w-6" />
+                        Female Voice
+                      </Label>
+                    </div>
+                  </RadioGroup>
                 </div>
 
                 <div className="space-y-2">

@@ -99,9 +99,9 @@ async def get_all_courses(
         if language:
             # Filter where source_language IS language OR target_languages CONTAINS language
             # Format for PostgREST array contains is cs.{"en"}
-            # We use a raw OR filter for this logic
-            # Using logic: source_language.eq.lang,target_languages.cs.{lang}
-            query = query.or_(f"source_language.eq.{language},target_languages.cs.{{{language}}}")
+            # BUT target_languages is TEXT in database, so we must use ilike
+            # Using logic: source_language.eq.lang OR target_languages.ilike.%lang%
+            query = query.or_(f"source_language.eq.{language},target_languages.ilike.%{language}%")
 
         if search:
             query = query.or_(f"title.ilike.%{search}%,description.ilike.%{search}%")

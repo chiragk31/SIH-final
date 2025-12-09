@@ -14,12 +14,14 @@ import { getCourseById, CourseWithVideos } from '@/services/courses';
 import { getCourseProgress, updateVideoProgress } from '@/services/enrollments';
 import { INDIAN_LANGUAGES } from '@/constants/languages';
 import {
-    CheckCircle2, Circle, Play, ArrowLeft, BookOpen, Clock, Languages, Loader2
+    CheckCircle2, Circle, Play, ArrowLeft, BookOpen, Clock, Languages, Loader2, FileText, Video as VideoIcon
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import { triggerDubbing, pollDubbingStatus, checkDubbedVersion } from '@/services/dubbing';
 import api from '@/services/api';
+import { CourseDocuments } from '@/components/course/CourseDocuments';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 const CoursePlayer = () => {
@@ -41,7 +43,14 @@ const CoursePlayer = () => {
     const [dubbedUrl, setDubbedUrl] = useState<string | null>(null);
     const [availableLanguages, setAvailableLanguages] = useState<string[]>(['en-IN']); // Languages available for current video
 
-    const currentVideo = course?.videos?.[currentVideoIndex];
+    // View Mode: 'video' | 'documents'
+    const [viewMode, setViewMode] = useState<'video' | 'documents'>('video');
+
+    // Filtered Content
+    const videos = course?.videos?.filter(v => v.content_type === 'video' || v.content_type === 'audio') || [];
+    const documents = course?.videos?.filter(v => v.content_type === 'document' || v.content_type === 'image') || [];
+
+    const currentVideo = videos[currentVideoIndex]; // Use filtered videos list
 
     // Fetch available dubbed languages for current video
     useEffect(() => {
@@ -216,7 +225,9 @@ const CoursePlayer = () => {
             // If videoId is in query params, find and set that video
             const videoId = searchParams.get('videoId');
             if (videoId && data.videos) {
-                const videoIndex = data.videos.findIndex(v => v.id === videoId);
+                // Find visible video index (ignoring documents)
+                const visibleVideos = data.videos.filter(v => v.content_type === 'video' || v.content_type === 'audio');
+                const videoIndex = visibleVideos.findIndex(v => v.id === videoId);
                 if (videoIndex !== -1) {
                     setCurrentVideoIndex(videoIndex);
                 }
@@ -253,7 +264,8 @@ const CoursePlayer = () => {
     const handleVideoEnd = async () => {
         if (!course || !courseId) return;
 
-        const currentVideo = course.videos[currentVideoIndex];
+        // Use filtered videos
+        const currentVideo = videos[currentVideoIndex];
         if (!currentVideo) return;
 
         try {
@@ -278,7 +290,7 @@ const CoursePlayer = () => {
             });
 
             // Auto-play next video if available
-            if (currentVideoIndex < course.videos.length - 1) {
+            if (currentVideoIndex < videos.length - 1) {
                 setTimeout(() => {
                     setCurrentVideoIndex(currentVideoIndex + 1);
                 }, 2000);
@@ -296,7 +308,7 @@ const CoursePlayer = () => {
         setWatchedPercentage(percentage);
 
         // Mark as complete if watched 90%+
-        if (percentage >= 90 && !progress[course.videos[currentVideoIndex]?.id]?.completed) {
+        if (percentage >= 90 && currentVideo && !progress[currentVideo.id]?.completed) {
             handleVideoEnd();
         }
     };
@@ -323,7 +335,7 @@ const CoursePlayer = () => {
 
 
     const completedCount = Object.values(progress).filter((p: any) => p.completed).length;
-    const totalVideos = course.videos.length;
+    const totalVideos = videos.length;
 
     // Calculate real-time overall progress
     let overallProgress = 0;
@@ -346,108 +358,138 @@ const CoursePlayer = () => {
             <Header isAuthenticated userType={isTeacher ? "teacher" : "student"} />
 
             <div className="container px-4 py-6 lg:py-8 relative z-10">
-                {/* Back Button */}
-                <Button
-                    variant="ghost"
-                    className="mb-4"
-                    onClick={() => navigate(isTeacher ? '/teacher/courses' : '/my-courses')}
-                >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to My Courses
-                </Button>
+                {/* Header Section with Navigation */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                    <Button
+                        variant="ghost"
+                        onClick={() => navigate(isTeacher ? '/teacher/courses' : '/my-courses')}
+                        className="w-fit"
+                    >
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to My Courses
+                    </Button>
 
-                <div className="grid lg:grid-cols-[1fr_380px] gap-6">
-                    {/* Video Player */}
-                    <div className="space-y-6">
-                        {/* Language Selector */}
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <Languages className="h-5 w-5 text-primary" />
-                                <h2 className="text-lg font-semibold">Video Language</h2>
-                            </div>
-                            <Select
-                                value={selectedLanguage}
-                                onValueChange={setSelectedLanguage}
-                                disabled={isDubbing}
-                            >
-                                <SelectTrigger className="w-[200px] glass-card border-white/20">
-                                    <SelectValue placeholder="Select Language" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {INDIAN_LANGUAGES.map((lang) => {
-                                        const isAvailable = availableLanguages.includes(lang.code);
-                                        return (
-                                            <SelectItem key={lang.code} value={lang.code}>
-                                                <div className="flex items-center gap-2">
-                                                    <span>{lang.name} ({lang.native})</span>
-                                                    {isAvailable && (
-                                                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                                    )}
-                                                </div>
-                                            </SelectItem>
-                                        );
-                                    })}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {/* Video */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl"
+                    <div className="flex items-center gap-4 bg-white/5 p-1 rounded-lg backdrop-blur-md border border-white/10">
+                        <Button
+                            variant={viewMode === 'video' ? 'secondary' : 'ghost'}
+                            onClick={() => setViewMode('video')}
+                            className="flex-1 md:w-[150px]"
                         >
-                            {isDubbing ? (
-                                <div className="w-full h-full flex items-center justify-center">
-                                    <div className="text-center">
-                                        <Loader2 className="h-16 w-16 text-primary animate-spin mx-auto mb-4" />
-                                        <p className="text-white text-lg">Processing dubbing...</p>
-                                    </div>
+                            <VideoIcon className="mr-2 h-4 w-4" />
+                            Videos
+                        </Button>
+                        <Button
+                            variant={viewMode === 'documents' ? 'secondary' : 'ghost'}
+                            onClick={() => setViewMode('documents')}
+                            className="flex-1 md:w-[150px]"
+                        >
+                            <FileText className="mr-2 h-4 w-4" />
+                            Documents
+                        </Button>
+                    </div>
+                </div>
+
+                {viewMode === 'documents' ? (
+                    <motion.div
+                        key="documents"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        {/* Pass filtered documents to the component */}
+                        <CourseDocuments documents={documents as any} courseId={courseId!} />
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="video"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                        className="grid lg:grid-cols-[1fr_380px] gap-6"
+                    >
+                        {/* Video Player Side */}
+                        <div className="space-y-6">
+                            {/* Language Selector */}
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                    <Languages className="h-5 w-5 text-primary" />
+                                    <h2 className="text-lg font-semibold">Video Language</h2>
                                 </div>
-                            ) : currentVideo ? (
-                                <video
-                                    ref={videoRef}
-                                    key={currentVideo.id + (dubbedUrl || '')}
-                                    src={dubbedUrl || currentVideo.file_url}
-                                    poster={currentVideo.thumbnail_url}
-                                    controls
-                                    controlsList="nodownload"
-                                    className="w-full h-full"
-                                    onEnded={handleVideoEnd}
-                                    onTimeUpdate={handleVideoTimeUpdate}
-                                    crossOrigin="anonymous"
+                                <Select
+                                    value={selectedLanguage}
+                                    onValueChange={setSelectedLanguage}
+                                    disabled={isDubbing}
                                 >
-                                    {/* 🚀 Subtitle Tracks */}
-                                    {currentVideo.subtitles && Object.entries(currentVideo.subtitles).map(([lang, data]: [string, any]) => {
-                                        const subtitleUrl = typeof data === 'string' ? data : data?.subtitle;
-                                        if (!subtitleUrl) return null;
+                                    <SelectTrigger className="w-[200px] glass-card border-white/20">
+                                        <SelectValue placeholder="Select Language" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {INDIAN_LANGUAGES.map((lang) => {
+                                            const isAvailable = availableLanguages.includes(lang.code);
+                                            return (
+                                                <SelectItem key={lang.code} value={lang.code}>
+                                                    <div className="flex items-center gap-2">
+                                                        <span>{lang.name} ({lang.native})</span>
+                                                        {isAvailable && (
+                                                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                                        )}
+                                                    </div>
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-                                        return (
-                                            <track
-                                                key={lang}
-                                                kind="subtitles"
-                                                src={subtitleUrl}
-                                                srcLang={lang}
-                                                label={INDIAN_LANGUAGES.find(l => l.code === lang)?.name || (lang === 'en' ? 'English' : lang)}
-                                                default={lang === selectedLanguage || (selectedLanguage === 'en-IN' && lang === 'en')}
-                                            />
-                                        );
-                                    })}
-                                </video>
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-white">
-                                    <p>No video selected</p>
-                                </div>
-                            )}
-                        </motion.div>
+                            {/* Video */}
+                            <motion.div
+                                className="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl"
+                            >
+                                {isDubbing ? (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <div className="text-center">
+                                            <Loader2 className="h-16 w-16 text-primary animate-spin mx-auto mb-4" />
+                                            <p className="text-white text-lg">Processing dubbing...</p>
+                                        </div>
+                                    </div>
+                                ) : currentVideo ? (
+                                    <video
+                                        ref={videoRef}
+                                        key={currentVideo.id + (dubbedUrl || '')}
+                                        src={dubbedUrl || currentVideo.file_url}
+                                        poster={currentVideo.thumbnail_url}
+                                        controls
+                                        controlsList="nodownload"
+                                        className="w-full h-full"
+                                        onEnded={handleVideoEnd}
+                                        onTimeUpdate={handleVideoTimeUpdate}
+                                        crossOrigin="anonymous"
+                                    >
+                                        {/* 🚀 Subtitle Tracks */}
+                                        {currentVideo.subtitles && Object.entries(currentVideo.subtitles).map(([lang, data]: [string, any]) => {
+                                            const subtitleUrl = typeof data === 'string' ? data : data?.subtitle;
+                                            if (!subtitleUrl) return null;
 
-                        {/* Video Info */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.1 }}
-                        >
+                                            return (
+                                                <track
+                                                    key={lang}
+                                                    kind="subtitles"
+                                                    src={subtitleUrl}
+                                                    srcLang={lang}
+                                                    label={INDIAN_LANGUAGES.find(l => l.code === lang)?.name || (lang === 'en' ? 'English' : lang)}
+                                                    default={lang === selectedLanguage || (selectedLanguage === 'en-IN' && lang === 'en')}
+                                                />
+                                            );
+                                        })}
+                                    </video>
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-white">
+                                        <p>No video selected</p>
+                                    </div>
+                                )}
+                            </motion.div>
+
+                            {/* Video Info */}
                             <Card className="glass-card border-white/20 dark:border-white/10 shadow-xl">
                                 <CardContent className="p-6">
                                     <h1 className="text-2xl font-bold mb-2">
@@ -470,74 +512,78 @@ const CoursePlayer = () => {
                                     </div>
                                 </CardContent>
                             </Card>
-                        </motion.div>
-                    </div>
+                        </div>
 
-                    {/* Course Content List */}
-                    <div className="space-y-6">
-                        <Card className="glass-card border-white/20 dark:border-white/10 h-fit">
-                            <CardContent className="p-6">
-                                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                    <BookOpen className="h-5 w-5 text-primary" />
-                                    Course Content
-                                </h3>
+                        {/* Course Content Playlist (Videos Only) */}
+                        <div className="space-y-6">
+                            <Card className="glass-card border-white/20 dark:border-white/10 h-fit">
+                                <CardContent className="p-6">
+                                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                        <BookOpen className="h-5 w-5 text-primary" />
+                                        Course Content
+                                    </h3>
 
-                                {/* Overall Progress */}
-                                <div className="mb-6">
-                                    <div className="flex justify-between text-sm mb-2">
-                                        <span>Course Progress</span>
-                                        <span>{Math.round(overallProgress)}%</span>
+                                    {/* Overall Progress */}
+                                    <div className="mb-6">
+                                        <div className="flex justify-between text-sm mb-2">
+                                            <span>Course Progress</span>
+                                            <span>{Math.round(overallProgress)}%</span>
+                                        </div>
+                                        <Progress value={overallProgress} className="h-2" />
                                     </div>
-                                    <Progress value={overallProgress} className="h-2" />
-                                </div>
 
-                                <div className="space-y-3">
-                                    {course.videos.map((video, index) => {
-                                        const isCompleted = progress[video.id]?.completed;
-                                        const isActive = currentVideoIndex === index;
+                                    <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                                        {videos.length === 0 ? (
+                                            <p className="text-center text-muted-foreground py-4">No videos in this course.</p>
+                                        ) : (
+                                            videos.map((video, index) => {
+                                                const isCompleted = progress[video.id]?.completed;
+                                                const isActive = currentVideoIndex === index;
 
-                                        return (
-                                            <motion.div
-                                                key={video.id}
-                                                initial={{ opacity: 0, x: -20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: index * 0.05 }}
-                                            >
-                                                <button
-                                                    onClick={() => handleVideoSelect(index)}
-                                                    className={`w-full text-left p-3 rounded-xl transition-all duration-200 flex items-start gap-3 group ${isActive
-                                                        ? 'bg-primary/10 border border-primary/20'
-                                                        : 'hover:bg-white/5 border border-transparent hover:border-white/10'
-                                                        }`}
-                                                >
-                                                    <div className={`mt-1 ${isCompleted ? 'text-green-500' : isActive ? 'text-primary' : 'text-muted-foreground'
-                                                        }`}>
-                                                        {isActive ? (
-                                                            <Play className="h-4 w-4 fill-current" />
-                                                        ) : isCompleted ? (
-                                                            <CheckCircle2 className="h-4 w-4" />
-                                                        ) : (
-                                                            <Circle className="h-4 w-4" />
-                                                        )}
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <p className={`text-sm font-medium line-clamp-2 ${isActive ? 'text-primary' : 'text-foreground'
-                                                            }`}>
-                                                            {video.title}
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground mt-1">
-                                                            {Math.round(video.duration / 60)} mins
-                                                        </p>
-                                                    </div>
-                                                </button>
-                                            </motion.div>
-                                        );
-                                    })}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
+                                                return (
+                                                    <motion.div
+                                                        key={video.id}
+                                                        initial={{ opacity: 0, x: -20 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ delay: index * 0.05 }}
+                                                    >
+                                                        <button
+                                                            onClick={() => handleVideoSelect(index)}
+                                                            className={`w-full text-left p-3 rounded-xl transition-all duration-200 flex items-start gap-3 group ${isActive
+                                                                ? 'bg-primary/10 border border-primary/20'
+                                                                : 'hover:bg-white/5 border border-transparent hover:border-white/10'
+                                                                }`}
+                                                        >
+                                                            <div className={`mt-1 ${isCompleted ? 'text-green-500' : isActive ? 'text-primary' : 'text-muted-foreground'
+                                                                }`}>
+                                                                {isActive ? (
+                                                                    <Play className="h-4 w-4 fill-current" />
+                                                                ) : isCompleted ? (
+                                                                    <CheckCircle2 className="h-4 w-4" />
+                                                                ) : (
+                                                                    <Circle className="h-4 w-4" />
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <p className={`text-sm font-medium line-clamp-2 ${isActive ? 'text-primary' : 'text-foreground'
+                                                                    }`}>
+                                                                    {video.title}
+                                                                </p>
+                                                                <p className="text-xs text-muted-foreground mt-1">
+                                                                    {Math.round(video.duration / 60)} mins
+                                                                </p>
+                                                            </div>
+                                                        </button>
+                                                    </motion.div>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </motion.div>
+                )}
             </div>
         </div >
     );

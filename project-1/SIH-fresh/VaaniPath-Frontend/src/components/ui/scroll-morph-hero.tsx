@@ -281,7 +281,7 @@ export default function IntroAnimation() {
     const contentY = useTransform(smoothMorph, [0.8, 1], [20, 0]);
 
     return (
-        <div ref={containerRef} className="relative w-full h-full overflow-hidden">
+        <div ref={containerRef} className="relative w-[80%] mx-auto h-full overflow-hidden">
             {/* Enhanced Background Layer - WCAG Compliant */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-teal-50" aria-hidden="true">
                 {/* Aurora Glow 1 - Blue */}
