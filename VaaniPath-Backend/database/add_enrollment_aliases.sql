@@ -1,0 +1,3 @@
+ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS video_id TEXT;
+ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP;
+ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS progress_percentage FLOAT DEFAULT 0;

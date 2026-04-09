@@ -1,0 +1,1 @@
+ALTER TABLE videos ADD COLUMN IF NOT EXISTS tutor_gender VARCHAR(50) DEFAULT 'male';

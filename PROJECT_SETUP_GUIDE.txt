@@ -1,0 +1,131 @@
+VAANIPath PROJECT DEPLOYMENT AND EXECUTION GUIDE
+
+This document provides step-by-step instructions for the technical setup and execution of the VAANIPath project. The project is modularized into three components: Frontend, Backend, and ML-Localizer.
+
+IMPORTANT: For security reasons, environment configuration files (.env) and private API keys have been excluded from the source code. You must create these files manually as instructed below.
+
+I. PREREQUISITE SOFTWARE INSTALLATION
+
+Before proceeding with the project setup, ensure the following core dependencies are installed on the host system:
+
+1. Python (v3.9 or higher): 
+   Download from: https://www.python.org/downloads/
+   Verification command: python --version
+
+2. Node.js (v18.0 or higher): 
+   Download from: https://nodejs.org/
+   Verification command: node -v
+
+3. FFmpeg (Required for Media Processing):
+   Download: https://www.gyan.dev/ffmpeg/builds/ (For Windows)
+   Installation Note: After downloading the "essentials" build, extract the folder to a permanent location (e.g., C:\ffmpeg) and add the 'bin' folder to your system's Environment Variables (Path).
+   Verification command: ffmpeg -version
+
+---
+
+II. EXTRACTION AND FILE ORGANIZATION
+
+1. Locate the three provided ZIP files:
+   - Frontend_Source.zip
+   - Backend_Source.zip
+   - Localizer_Source.zip
+
+2. Create a root directory named 'VAANIPath_Project'.
+
+3. Extract each ZIP file into its own sub-folder within the root directory as shown below:
+   VAANIPath_Project/
+   ├── Frontend/           
+   ├── Backend/            
+   └── Localizer/          
+
+---
+
+III. COMPONENT-WISE SETUP INSTRUCTIONS
+
+STEP 1: BACKEND CONFIGURATION (PORT: 8000)
+
+1. Open a terminal and navigate to the Backend folder:
+   cd Backend
+
+2. Install dependencies:
+   pip install -r requirements.txt
+
+3. Environment Setup:
+   Create a file named '.env' (exactly as written) in the Backend root directory.
+   Add the following variables with your own credentials:
+   
+   SUPABASE_URL=your_project_url
+   SUPABASE_KEY=your_anon_public_key
+   SUPABASE_SERVICE_KEY=your_service_role_key
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
+   GROQ_API_KEY=your_groq_api_key
+   SECRET_KEY=any_random_string_for_security
+
+4. Execution:
+   python -m uvicorn app.main:app --reload --port 8000
+
+
+STEP 2: ML-LOCALIZER CONFIGURATION (PORT: 8001)
+
+1. Open a new terminal and navigate to the Localizer folder:
+   cd Localizer
+
+2. Install dependencies:
+   pip install -r localizer/requirements.txt
+
+3. Environment Setup:
+   Create a file named '.env' in the Localizer root directory.
+   Add the following variables:
+   
+   GROQ_API_KEY=your_groq_api_key
+   ELEVENLABS_API_KEY=your_elevenlabs_key (Optional)
+   GOOGLE_APPLICATION_CREDENTIALS=path_to_your_gcp_json (Optional for Google TTS)
+
+4. Execution:
+   python run_ml_service.py
+
+
+STEP 3: FRONTEND CONFIGURATION (PORT: 8080)
+
+1. Open a third terminal and navigate to the Frontend folder:
+   cd Frontend
+
+2. Install Node.js packages:
+   npm install
+
+3. Environment Setup:
+   Create a file named '.env' in the Frontend root directory.
+   Add the following variables:
+   
+   VITE_API_BASE_URL=http://localhost:8000
+   VITE_LOCALIZER_URL=http://localhost:8001
+
+4. Execution:
+   npm run dev
+
+---
+
+IV. STARTUP SEQUENCE AND SYSTEM ACCESS
+
+For the overall system to interact correctly, always initialize the services in the following order:
+
+1. Start Backend Service (Keep terminal open)
+2. Start ML-Localizer Service (Keep terminal open)
+3. Start Frontend Service
+
+Once all services are running, access the application via your web browser at:
+URL: http://localhost:8080
+
+---
+
+V. TROUBLESHOOTING
+
+- Port Conflicts: Ensure ports 8000, 8001, and 8080 are free.
+- .env File: Ensure the file extension is literally '.env' and not '.env.txt'.
+- FFmpeg: If media processing fails, double-check that 'ffmpeg' is in the system PATH.
+
+-------------------------------------------------------------------------------
+END OF SETUP GUIDE
+-------------------------------------------------------------------------------

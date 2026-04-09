@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "E:\SIH-final-feature-latest-updates\SIH-final-feature-latest-updates\SIH-final-project\VaaniPath-Backend\add_admin.py", line 34, in <module>
+    asyncio.run(add_admin())
+  File "C:\Users\Chirag\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\Chirag\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chirag\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 664, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "E:\SIH-final-feature-latest-updates\SIH-final-feature-latest-updates\SIH-final-project\VaaniPath-Backend\add_admin.py", line 31, in add_admin
+    response = supabase.table("users").insert(user_data).execute()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chirag\AppData\Local\Programs\Python\Python312\Lib\site-packages\postgrest\_sync\request_builder.py", line 53, in execute
+    raise APIError(dict(json_obj))
+postgrest.exceptions.APIError: {'message': "Could not find the 'preferred_language' column of 'users' in the schema cache", 'code': 'PGRST204', 'hint': None, 'details': None}
